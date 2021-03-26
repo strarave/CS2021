@@ -1,0 +1,295 @@
+\documentclass[10pt,a4paper]{article}
+\title{Computer Security}
+\author{Elia Ravella}
+\begin{document}
+	\begin{titlepage}
+		\maketitle
+	\end{titlepage}
+	
+	\tableofcontents
+	\clearpage
+	
+	\part{Introduction} 
+		%% shellcoder's handbook, C. Anley and J. Heasman
+		\section{Security}
+			What is security? First, we need to distinguish \emph{security} itself and \emph{safety}; the first represents a system that protects from the outside, the second a system that does not harm when it's used.
+			
+			\subsection{What is a secure system and how to engineer one}
+				Famous triangle problem, this time with CIA properties
+				\begin{itemize}
+					\item Confidentiality: only authorized entities can access information
+					\item Integrity: only authorized entities can modify information;
+					\item Availabilty: data must be available to all authorized entities in a determined time constraint.
+				\end{itemize}
+				"You can take only two" problem: A conflicts with C and I.\\
+				System security is an engineering problem: it's crucial to find an \emph{optimal tradeoff} between properties to be ensured, and costs to be faced when securing such properties.
+			
+			\subsection{Entities in a secure system}
+				\begin{itemize}
+					\item Vulnerability: something that allows to violate one of the CIA properties. It can be something as a design errors, a construction error, or a use defect. Even an \emph{inherent property} of a system can be a vulnerability.
+					\item Exploit: a specific way to use a vulnerability (or more) to violate one of CIA properties.
+					\item Asset: values of a system, properties that must be protected. Depending on the context a system operates in, different assets can be defined (soldier - armor - life).
+					\item Threat: \textbf{possible / potential} violation of CIA constraints. A threat is linked to a threat agent, that's the actual physical person / system that performs the potential attack.
+					\item Attack: \textbf{intentional} use of an exploit to violate CIA properties.
+					\item Risks: combination of assets, vulnerabilities and threats. Formally (using economic value) they're A*V*T. Risk management takes care of the first two properties. The security problem is to manage the reduction of vulnerabilities and the recovery / mitigation plan. 
+				\end{itemize}
+				\textbf{A vulnerability can be present without any exploits. An exploit depends from a set of vulnerabilities}.\\
+				
+				\paragraph{Security vs Cost Balance}
+					As usual, costs can be separated in direct and indirect costs. In this scenario, direct costs are related to the actual put-in-place of a solution. Indirect costs, instead are all the user experience costs, all those experience-heaving procedures, for example. So EVERY SINGLE SECURITY SOLUTION ADDS A COST.
+					
+				\paragraph{Trust and Boundaries}
+					The security problem must have boundaries, otherwise it will cover over the universe. So, subparts must become \emph{trusted} and be \emph{assumed secure}. All the system that are beyond (below) the boundary are assumed secure too. The trusted element is the one to be tested most. 
+			
+			
+				
+	\part{Cryptography}
+		\section{Cryptography, cryptoanalisys, cryptology}
+			Cryptography is the building of secure mathematical systems. Cryptoanalisys is the discipline of analyzing such systems, and trying to break them. Cryptology is the union of both.\\
+			Cryptography \emph{as a discipline} was formalized by Claude Shannon in 1949. The (still actual) formalization of a cryptosystem is composed of 3 main components:
+			\begin{enumerate}
+				\item the \emph{plaintext}, the message to be encoded
+				\item the reversible \emph{key}
+				\item the \emph{cyphertext}, the encoded message
+			\end{enumerate}
+			
+			\subsection{Confidentiality and Integrity}
+				"Why a cryptosystem"? The two main features that a cryptosystem must have are
+				\begin{enumerate}
+					\item confidentiality: only the recipients can read and utilize the information in the message.
+					\item integrity: data can't be altered in the message passing. If so, the recipient can detect the change.
+				\end{enumerate}
+				The Kerchoff's principles states that the security of a cryptosystem relies \emph{solely} on the secrecy of the key, rather than the secrecy of the algorithm. This, in fact, should remain public. This means that a secure system is \emph{transparent} inherently.\\
+				\textbf{The key must be the trusted element of the entire cryptographic system}.\\
+				Formally, a perfect cypher does not leak any information about the message if and only of
+				\begin{equation}
+					P(M=m \,\vert\, C=c) = P(M=m)
+				\end{equation}
+				As theorized by Shannon. So "the probability of observing message m given cypher c is indipendent from the cypher given". Shannon also proved that perfect cyphers exists: they're \emph{one time non reusable key systems, with the lenght of the key equal to the lenght of the message} (also known as the \textbf{Shannon Theorem)}.\\
+				The only perfect cypher implementation is OTP, One Time Pad. Classic XOR based encryption with a one time password (pre shared) that is long as the message. The cool thing about perfect cyphers such as OTP is that bruteforcing the cyphertext simply returns all the possible combination of plaintext, rendering so useless the brutaforce approach.
+			
+			\subsection{Cryptoanalysis}
+				All the "brutaforce" fuss is about the problem of determining "how much a system is breakable". Bruteforce "always works", but it's a costly approach. So, it formally represents an \emph{upper bound} to the decyfering provedure complexity for that cypher. Other (more smart) attacks are 
+				\begin{itemize}
+					\item Cyphertext attack - only cyphered text are available, a key/algorithm leak of information must be exploited
+					\item Known plaintext attack - comparation between the plain and crypted texts should lead to the key
+					\item Chosen plaintext attack - reverse engineering of the algorithm
+				\end{itemize}
+				distinguished by the materials available to the attacker, and orderd in increasing complexity.
+				
+			\subsection{Remarks on Cryptosystems}
+				\begin{enumerate}
+					\item Security of a CS is based on the robustness of the \emph{algorithm}
+					\item No algorithm is invulnerable to brute force attacks, exceptionmade for \emph{one time pads}
+					\item An algorithm is said to be broken if there's at least one way \emph{faster than bruteforce} to bypass it
+					\item THe only way to prove a cypher is robust is to try to break it
+				\end{enumerate}
+		
+		\section{Symmetric Encryption}
+			Classic: Alice uses key K to encrypt message M into cypher C, then Bob uses the very same key K to decypher cypher C into message M. Problem: exchanging keys. We need a \emph{trusted separated channel} to exchange the key. What is a trusted channel? It generally is a different channel that both the recipients \emph{consider trusted} and generally \emph{requires a different attack to be violated}.\\
+			We so must try to find a way to send to all recipents the key \emph{in a secure way}. Another issue with symmetric encrypted communication is scalability, each pair of user in a network should have a unique key. 
+			
+			\subsection{How to build a secure symmetric system}
+				Three characteristics are fundamental to ensure the robustness of a symmetric cypher:
+				\begin{enumerate}
+					\item \emph{Multi Alphabetical Cyphers}: to mask structure and repetition in the plaintext several target alphabets can be (must be) used at the same time.
+					\item \emph{Transposition}: also called diffusion, it consists of "swapping the value of bits", messing with the order in which the plaintext is translated.
+				\end{enumerate}
+				
+				\paragraph{Keyspace}
+					With keyspace is intended the \emph{set of possible keys}. There's an exponential correlation between the size (rank) of this set and the temporal complexity of the brutaforce effort. This means that more possible keys (generally translated in "how many bits is the key made of") more the time needed to bruteforce the cypher. \emph{This is valid in the current silicon architecture computers. Quantum computations could change this}.
+		
+		\section{Asymmetric Encryption}
+			Cyphers with \emph{two} directional keys instead of one. What is encrypted with key A can be decrypted with key B and viceversa. What you can't do is
+			\begin{itemize}
+				\item decrypt the key with the \emph{same} key you used to encrypt the key
+				\item deduce (calculate) one key from another
+			\end{itemize}
+			This approach enables "public key scenarios" due to the asymmetricity of the encryption mechanism. The robustness of this methods relies on the function used to encrypt the plaintext, that must be easy to apply \emph{but difficult to reverse}.\\
+			To make a public key scenario works we must add to the set of trusted elements (that contains the private keys) a \emph{trusted assumption}: "only Bob knows Bob's private keys".\\
+			In asymmetric encryption the key lenght is an important measure of safeness. However, while in symmetric cypher the lenght of the key measure the number of decription attempts, in asymmetric cypher it measures the \emph{number of key-breaking attempts}. That implies that asymmetric cyphers are "easier" to crack because of the approach chosen to encrypt. This also means that asymmetric and symmetric cyphers cannot be compared only using the key lenght.
+			
+			\subsection{Hash Functions}
+				A hash function is a function that maps an \emph{arbitrary lenght string} in input on a \emph{fixed lenght string} at the output. Usually, input strings lenght are much longer than output ones $\Rightarrow$ \emph{collisions}. A good hash function satisfies three properties:
+				\begin{enumerate}
+					\item preimage attack resistance: the function is \emph{hard to invert}.
+					\item second preimage attack resistance: it must be difficult to find a input string that have the same hash to another one \emph{given} (if the function is not preimage resistant it's not second preimage resistant too. The opposite is not true tho).
+					\item collision resistance: it must be hard to find 2 inputs with the same output.
+				\end{enumerate}
+				
+				\subsubsection{Attacks to Hash Functions}
+					Hash function may be broken. This means that it's possible to find the original text from the cyphertwxt \emph{faster than bruteforcing}, just as the definition of broken cryptosystem. Two methods are used to attack a hash function:
+					
+					\paragraph{Arbitrary Collision}
+						This is a first/second preimage attack: the attacker tries to deduce $x \,\vert\, H(x) = h$ or, respectively, $y \,\vert\, y \neq x \wedge H(x) = H(y)$.\\
+						Again, an hash function is broken if this can be completed \emph{faster than bruteforcing it}.
+						
+					\paragraph{Simplified Collision Attack}
+						Exactly the same approach as the arbitrary collision attack, but exploiting some probabilistic aspects of the collision (birthday paradox).
+				
+				\subsubsection{Digital Signature}
+					Classic digital signature mechanism: an hash function produces a digest of a document, that's then encrypted with the private key of the sender. The receiver (to both check for identity of the sender and the integrity of the document) does the same: hashes the document and produces a digest, that's then compared with the decrypted version of the received one.\\
+					A big issue in this case is "who to trust". To estabilish a list of trusted elements the current infrastructure relies on Certification Authorities, a tree-like structure (a hierarchical group) of entities that each signs with a trusted key (a trusted role) the certificates.
+			
+	\part{Authentication}
+		\section{Identification and Authentication}
+			What's the difference between identification and authentication? The first represents the act of "telling your identity". Authentication means to \emph{proof} the stated identity. Authentication must be \emph{bidirectional} or \emph{mutual}: both entities must acknowledge each other identity and the proof.
+			
+			\subsection{Authentication factors}
+				To identify someone, three methods can be used:
+				\begin{enumerate}
+					\item Authentication by "to know" factor (passwords, pins)
+					\item Authentication by "to have" factor (cards, ids)
+					\item Authentication by "to be" factor (fingerprint, voice)
+				\end{enumerate}
+				Multi factor authentication uses more than one factor to authenticate.
+				
+				\subsubsection{To Know Authentication}
+					To Know authentication systems relies on something the user willing to authenticate remembers, or is supposed to know. These systems are low cost, are easy to deploy and easy to use (due to the spread of such systems). Systems basing on to know auth are systems that rely on passwords, pins, login data combination etc.\\
+					On the other hand, the secrets the user is asked to keep can be easily stolen or guessed, or even cracked (bruteforced). 
+					
+					\paragraph{Countermeasure Against Password Wearing}
+						Three different attacks can moved against a passwrod-secured system, each one has a valid countermeasure:
+						\begin{enumerate}
+							\item against snooping, it's valid to change password often;
+							\item against cracking, it's useful to enforce complexity of the password;
+							\item against guessing, it's useful to ask for a nonsense password, or at least not easy to pin to the user;
+						\end{enumerate}
+						A system cannot put in place all these countermeasure, because they are \emph{costly}: they heavy the use of a system (a system that asks for a 64 mixed characters every 2 days).
+						
+					\paragraph{Secure Password Exchange, Challenge Response}
+						Authentication phase, exchange of messages between two entities A and B that mutually authenticate each other
+						\begin{enumerate}
+							\item A to B: This is my identity. Let me authenticate
+							\item B to A: nice. Compute hash(random-data + secret) + random-data
+							\item A to B: hash(random-data + secret)
+							\item A to B: nice. Compute hash(random-shit + secret) + random-shit
+							\item B to A: hash(random-data + secret + random-shit)
+						\end{enumerate}
+						Where secret is the password, generally. The supposition is that both entities \emph{know} the secret.
+						
+					\paragraph{Secure Password Storage}
+						Passwords are the secret upon it's based the security of a system (an authenticating one, at least). How to enforce password security?\\
+						To protect a file (data in general) the techniques are always the same: 
+						\begin{itemize}
+							\item Encyption
+							\item Salting (modifying stored passwords to mitigate dictionary attack)
+							\item Access Control
+							\item Password Recovery procedures that not disclose sensitive infos
+						\end{itemize}
+				
+				\subsubsection{To Have Authentication}
+					To Have factor relies on \emph{a phisycal device / object} that must be associated to a person willing to authenticate. The problem remains the human factor: this time the security of the system depends on how the key (secret) is handled by the person associated to it.\\
+					In any case, to have authentication system are low cost and offer a good level of security. On the other hand, they're hard to deploy, and the tokens / cards are easy to be lost or destroyed / compromised.
+				
+				\subsubsection{To Be Authentication}
+					To be authentication asks the person willing to authenticate to prove to be who s/he declares to be by biometrically satisfy a costraint (like having a certain fingerprint, hand geometry, iris pattern...).\\
+					Although this kind of authentication is very effective (it's \emph{really} difficult to emulate someone else's fingerprint) the list of disadvantages for biometric security systems is quite long:
+					\begin{enumerate}
+						\item They're hard to deploy and set up. Moreover, usually during the setup phase an invasive test must be performed
+						\item The matching of the feature selected is non-deterministic: accepting or rejecting a person depends on a threshold of accuracy, and this can act differently from time to time
+						\item They're not \emph{entirely} secure: a fingerprint can be cloned
+						\item Biometric features \emph{change} over time
+						\item Privacy issues: people \emph{may not want} to distribute personal features involved in a biometric security system
+					\end{enumerate}
+				
+				\subsubsection{Single Sign On}
+					Single sign on was proposed as a system to countermeasure to password reusing. This system is based on a 1-2 factors authentication and \emph{a single trusted host}. This is simply the "delegating authentication to someone else" method of authentication, the \emph{external auth} method. Two main approaches:
+					\begin{itemize}
+						\item SAML approach: an external service serves as authentication factor
+						\item OAuth approach: the external service \emph{just helps the authentication}, giving the user a code in order to sign on to the principal service
+					\end{itemize}
+					This is also complicated to implement: an app should (in order to implement OAuth or SAML) complicate a lot its flow of usage (user experience) in order to just authenticate a user.\\
+					Moreover, the trusted factor is a SPOF.
+					
+		\section{Access Control}
+			Access control is all the protocols and procedures that \emph{allow or deny} certain operations to be applied on certain resources. This operation is usually performed by a reference monitor, that carries out the verification of the rules and the roles (lol).
+			
+			\subsection{Discretionary Access Control}
+				The resource owner assigns the priviledges to users. It's the most standard access control system: for every user (or entity) a set of permissions is defined that describe the rights of each one. A DAC is defined by 3 set of entities:
+				\begin{enumerate}
+					\item subjects: the actors, the users
+					\item objects: the resources
+					\item actions: the actions that subjects can perform on objects, that are restricted by the rules
+				\end{enumerate}
+				
+			
+			\subsection{Mandatory Access Control}
+				Clearance / Sensitivity access control management. Based on user's roles combined with "objects' secrecy levels". 
+			
+			\subsection{Role Based Access Control}
+					
+	\part{Web security}		
+	\part{Exercises and Examples}
+		\section{Exercises}
+			\subsection{Identity theft}
+				Which are the risk components in the scenario of identity theft, like in social media platforms?
+				\begin{enumerate}
+					\item Reputation threathened both of the victim and the company
+					\item Social engineering attacks
+					\item Malicious spread of information
+				\end{enumerate}
+				And the assets?
+				\begin{enumerate}
+					\item reputation
+					\item money
+					\item personal information
+				\end{enumerate}
+				And who are the threat agents?
+				\begin{enumerate}
+					\item People around you
+					\item Government
+					\item etc
+				\end{enumerate}
+				So \emph{everybody} with a malicious intent\\
+				Why is this scenario possible, and how to mitigate it?
+				\begin{enumerate}
+					\item 2FA
+					\item trusted device based auth
+					\item enforce credentials strongness
+				\end{enumerate}
+				
+			\subsection{Ransomware attack}
+				A small company specialized in a particular object is infected by a ransomware\\
+				What are the threats, the asset at risk and the possible countermeasures?\\
+				First:
+				\begin{itemize}
+					\item data loss
+					\item data of the company
+					\item offline backups
+				\end{itemize}
+				Second:
+				\begin{itemize}
+					\item data leakage
+					\item data of the company
+					\item encryption
+				\end{itemize}
+				Third:
+				\begin{itemize}
+					\item denial of service
+					\item production
+					\item redundancy
+				\end{itemize}
+				Who are the possible threat agents? Cuncurrent companies, ex internal employees, ransomers...
+				
+			\subsection{Auto driving vehicles}
+				Consider auto driving cars used as taxies.\\
+				Which are the most valuable assets in this scenario?
+				\begin{enumerate}
+					\item People inside the car
+					\item People outside the car
+					\item the vehicle itself
+				\end{enumerate}
+				What are the attack surfaces on the vehicles?
+				\begin{enumerate}
+					\item The VEHICLE itself, you enter there!
+					\item the connectivity capabilities of the vehicle
+					\item the company network, or the internet itself (it was an hypothesis)
+				\end{enumerate}
+
+
+
+
+
+
+\end{document}
