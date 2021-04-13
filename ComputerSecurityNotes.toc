@@ -1,36 +1,51 @@
-\contentsline {part}{I\hspace {1em}Introduction}{2}{}%
-\contentsline {section}{\numberline {1}Security}{2}{}%
-\contentsline {subsection}{\numberline {1.1}What is a secure system and how to engineer one}{2}{}%
-\contentsline {subsection}{\numberline {1.2}Entities in a secure system}{2}{}%
-\contentsline {paragraph}{Security vs Cost Balance}{3}{}%
-\contentsline {paragraph}{Trust and Boundaries}{3}{}%
-\contentsline {part}{II\hspace {1em}Cryptography}{3}{}%
-\contentsline {section}{\numberline {2}Cryptography, cryptoanalisys, cryptology}{3}{}%
-\contentsline {subsection}{\numberline {2.1}Confidentiality and Integrity}{3}{}%
-\contentsline {subsection}{\numberline {2.2}Cryptoanalysis}{4}{}%
-\contentsline {subsection}{\numberline {2.3}Remarks on Cryptosystems}{4}{}%
-\contentsline {section}{\numberline {3}Symmetric Encryption}{4}{}%
-\contentsline {subsection}{\numberline {3.1}How to build a secure symmetric system}{5}{}%
-\contentsline {paragraph}{Keyspace}{5}{}%
-\contentsline {section}{\numberline {4}Asymmetric Encryption}{5}{}%
-\contentsline {subsection}{\numberline {4.1}Hash Functions}{5}{}%
-\contentsline {subsubsection}{\numberline {4.1.1}Attacks to Hash Functions}{6}{}%
-\contentsline {paragraph}{Arbitrary Collision}{6}{}%
-\contentsline {paragraph}{Simplified Collision Attack}{6}{}%
-\contentsline {subsubsection}{\numberline {4.1.2}Digital Signature}{6}{}%
-\contentsline {part}{III\hspace {1em}Authentication}{6}{}%
-\contentsline {section}{\numberline {5}Identification and Authentication}{6}{}%
-\contentsline {subsection}{\numberline {5.1}Authentication factors}{6}{}%
-\contentsline {subsubsection}{\numberline {5.1.1}To Know Authentication}{7}{}%
-\contentsline {paragraph}{Countermeasure Against Password Wearing}{7}{}%
-\contentsline {paragraph}{Secure Password Exchange, Challenge Response}{7}{}%
-\contentsline {paragraph}{Secure Password Storage}{7}{}%
-\contentsline {subsubsection}{\numberline {5.1.2}To Have Authentication}{8}{}%
-\contentsline {subsubsection}{\numberline {5.1.3}To Be Authentication}{8}{}%
-\contentsline {subsubsection}{\numberline {5.1.4}Single Sign On}{8}{}%
-\contentsline {part}{IV\hspace {1em}Web security}{8}{}%
-\contentsline {part}{V\hspace {1em}Exercises and Examples}{9}{}%
-\contentsline {section}{\numberline {6}Exercises}{9}{}%
-\contentsline {subsection}{\numberline {6.1}Identity theft}{9}{}%
-\contentsline {subsection}{\numberline {6.2}Ransomware attack}{9}{}%
-\contentsline {subsection}{\numberline {6.3}Auto driving vehicles}{10}{}%
+\contentsline {part}{I\hspace {1em}Introduction}{3}{}%
+\contentsline {section}{\numberline {1}Security}{3}{}%
+\contentsline {subsection}{\numberline {1.1}What is a secure system and how to engineer one}{3}{}%
+\contentsline {subsection}{\numberline {1.2}Entities in a secure system}{3}{}%
+\contentsline {paragraph}{Security vs Cost Balance}{4}{}%
+\contentsline {paragraph}{Trust and Boundaries}{4}{}%
+\contentsline {part}{II\hspace {1em}Cryptography}{4}{}%
+\contentsline {section}{\numberline {2}Cryptography, cryptoanalisys, cryptology}{4}{}%
+\contentsline {subsection}{\numberline {2.1}Confidentiality and Integrity}{4}{}%
+\contentsline {subsection}{\numberline {2.2}Cryptoanalysis}{5}{}%
+\contentsline {subsection}{\numberline {2.3}Remarks on Cryptosystems}{5}{}%
+\contentsline {section}{\numberline {3}Symmetric Encryption}{5}{}%
+\contentsline {subsection}{\numberline {3.1}How to build a secure symmetric system}{6}{}%
+\contentsline {paragraph}{Keyspace}{6}{}%
+\contentsline {section}{\numberline {4}Asymmetric Encryption}{6}{}%
+\contentsline {subsection}{\numberline {4.1}Hash Functions}{6}{}%
+\contentsline {subsubsection}{\numberline {4.1.1}Attacks to Hash Functions}{7}{}%
+\contentsline {paragraph}{Arbitrary Collision}{7}{}%
+\contentsline {paragraph}{Simplified Collision Attack}{7}{}%
+\contentsline {subsubsection}{\numberline {4.1.2}Digital Signature}{7}{}%
+\contentsline {part}{III\hspace {1em}Authentication}{7}{}%
+\contentsline {section}{\numberline {5}Identification and Authentication}{7}{}%
+\contentsline {subsection}{\numberline {5.1}Authentication factors}{7}{}%
+\contentsline {subsubsection}{\numberline {5.1.1}To Know Authentication}{8}{}%
+\contentsline {paragraph}{Countermeasure Against Password Wearing}{8}{}%
+\contentsline {paragraph}{Secure Password Exchange, Challenge Response}{8}{}%
+\contentsline {paragraph}{Secure Password Storage}{8}{}%
+\contentsline {subsubsection}{\numberline {5.1.2}To Have Authentication}{9}{}%
+\contentsline {subsubsection}{\numberline {5.1.3}To Be Authentication}{9}{}%
+\contentsline {subsubsection}{\numberline {5.1.4}Single Sign On}{9}{}%
+\contentsline {section}{\numberline {6}Access Control}{10}{}%
+\contentsline {subsection}{\numberline {6.1}Discretionary Access Control}{10}{}%
+\contentsline {subsection}{\numberline {6.2}Mandatory Access Control}{10}{}%
+\contentsline {subsection}{\numberline {6.3}Role Based Access Control}{11}{}%
+\contentsline {part}{IV\hspace {1em}Software Security}{11}{}%
+\contentsline {section}{\numberline {7}What is software security?}{11}{}%
+\contentsline {paragraph}{Vulnerability / Attack relationship}{11}{}%
+\contentsline {section}{\numberline {8}Principles of Secure Design}{12}{}%
+\contentsline {section}{\numberline {9}Vulnerabilities}{12}{}%
+\contentsline {subsection}{\numberline {9.1}Buffer Overflow}{12}{}%
+\contentsline {part}{V\hspace {1em}Exercises and Examples}{12}{}%
+\contentsline {section}{\numberline {10}Exercises}{12}{}%
+\contentsline {subsection}{\numberline {10.1}Identity theft}{12}{}%
+\contentsline {subsection}{\numberline {10.2}Ransomware attack}{13}{}%
+\contentsline {subsection}{\numberline {10.3}Auto driving vehicles}{13}{}%
+\contentsline {part}{VI\hspace {1em}x86 assembly recap and pwndbg}{14}{}%
+\contentsline {section}{\numberline {11}Recap of software compiling}{14}{}%
+\contentsline {section}{\numberline {12}The x86 ISA}{14}{}%
+\contentsline {subsection}{\numberline {12.1}Data types}{14}{}%
+\contentsline {subsection}{\numberline {12.2}Instructions}{14}{}%
+\contentsline {section}{\numberline {13}Executables and binaries}{15}{}%

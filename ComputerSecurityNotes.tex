@@ -1,4 +1,8 @@
 \documentclass[10pt,a4paper]{article}
+
+\usepackage{float}
+\usepackage{graphicx}
+
 \title{Computer Security}
 \author{Elia Ravella}
 \begin{document}
@@ -212,14 +216,62 @@
 					\item objects: the resources
 					\item actions: the actions that subjects can perform on objects, that are restricted by the rules
 				\end{enumerate}
+				The reference monitor organizes the subjects and the objects in a two entry map that lists what every user can do to each resource. This implementation is called HRU model, due to its designers. What this model also allow is to check if the access control system works as intended: if it can be proven that a user can "upgrade" his permissions \emph{on his own} the system is unsafe by design. This is an undecidable problem btw.\\
+				This implementation (let alone the scaling problem) is a little bit difficult to utilize, so alternative implementations are possible, like:
+				\begin{itemize}
+					\item Authorization tables: DBMS like approach, it's a HRU model with not null entries
+					\item Access control lists: used in networking, each objects records his own owners/users
+					\item Capability list: each user "remembers" the authorization he got
+				\end{itemize}
+				See how the last two implementations are just "read the HRU table coloumn by coloumn" and "read the HRU table row by row".
 				
 			
 			\subsection{Mandatory Access Control}
-				Clearance / Sensitivity access control management. Based on user's roles combined with "objects' secrecy levels". 
+				Clearance / Sensitivity access control management. Based on user's roles combined with "objects' secrecy levels". The idea behind is: do not let users assign priviledges. The priviledges are set by an administrator, that assigns levels to users and to resources. Each user level can access only a subset of the resource level. This is usually combined with a labeling system that categorizes in a finer way the resources, orthogonally to the secrecy level.\\
+				Then, read/write accesses are granted as rules, for example
+				\begin{itemize}
+					\item No read up
+					\item No write down
+				\end{itemize}
 			
 			\subsection{Role Based Access Control}
+				RBAC is kinda a hybrid of DAC and MAC, and can also enforce them: if configured in the right way, it can act as a DAC or as a MAC. The idea is similar to the one that driven MAC design ("no self assigning dynamic priviledges") but the roles are no more structured in a rigid hierarchy but instead are simply \emph{a label to a set of priviledges}.
 					
-	\part{Web security}		
+	\part{Software Security}		
+		\section{What is software security?}
+			With "software security" is intended the meeting of the non-functional requirement (obviously for a software) of \emph{being secure}. This is often overlooked in the process of software developing, but to remind the importance of this non functional requirement, it's sufficient to think about the name of the unmet security specifications: \textbf{vulnerability}.\\
+			Recap on definitions:
+			\begin{itemize}
+				\item Vulnerability: fault in the target software/system
+				\item Exploit: method to leverage a vulnerability to harm a system
+			\end{itemize}
+			
+			\paragraph{Vulnerability / Attack relationship}
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width = \textwidth]{./images/vulLifeCycle.png}
+				\end{figure}
+				This graph explains how the vulnerability life cycle interacts with the actual attacks cycle to a software. To be noted:
+				\begin{itemize}
+					\item zero days attacks happens when the vulnerability is "out in the wild", known only to hackers
+					\item at the moment the vulnerability is \emph{exposed to the public} other security firms can start working on side solutions to limit attacks, weakening the actual attackers margin
+					\item the window of exposure is closed \emph{ONLY} after the patch is installed \emph{everywhere}
+				\end{itemize}
+				
+		\section{Principles of Secure Design}
+			We can define a list of principles, guidelines, to create a secure software:
+			\begin{itemize}
+				\item Reduce the privileged parts to the minimum to avoid permissions vulnerability windows
+				\item KISS principle, reduce the complexity of a software
+				\item Avoid shared resources, or unsafe external libraries. Use instead safe and known secure libraries
+				\item Default deny principle: allow only authorized operations
+				\item Use filters on input and output
+			\end{itemize}
+			
+		\section{Vulnerabilities}
+			\subsection{Buffer Overflow}
+				Memory vulnerability, one of the most famous technique to exploit a software. Practically, it means that a piece of data is inserted in a buffer that is smaller. This enables the attacker to overwrite "sensitive" portion of the memory, and (in the worst case) inject malicious code.
+			
 	\part{Exercises and Examples}
 		\section{Exercises}
 			\subsection{Identity theft}
@@ -286,9 +338,47 @@
 					\item the connectivity capabilities of the vehicle
 					\item the company network, or the internet itself (it was an hypothesis)
 				\end{enumerate}
+				
+	\part{x86 assembly recap and pwndbg}
+		\section{Recap of software compiling}
+			Code is translated by the compiler in Assembly code that is the assembled in binary code. That's the workflow. The process is theoretically not reversible, it can be reconduced to the halting problem. This is due to the loss of information (for example about types in the first step) that the process introduces.
+			
+		\section{The x86 ISA}
+			64 bit CISC architecture for original Intel processors.\\
+			Register file:
+			\begin{enumerate}
+				\item EAX EBX ECX EDX
+				\item ESI EDI for strings
+				\item EBP ESP base and stack pointers
+				\item EIP instruction pointer, never explicitly accessed
+				\item EFLAGS program status and control 
+			\end{enumerate}
+			The "E" before the register name stands for "extended" and references the 64 bit version of the register. Omitting it will access the 32 bit version.
+			
+			\subsection{Data types}
+				Four main "data types"
+				\begin{enumerate}
+					\item Byte - 8 bit
+					\item Word - 2 Bytes
+					\item Dword - 2 Words
+					\item Qword - 4 Words
+				\end{enumerate}
+			
+			\subsection{Instructions}
+				Instructions in x86 have \emph{variable lenght} ranging from 1 byte to 16 bytes. Every instruction is composed of the opcode (representing the operation) and the operand list. We'll be using logic, memory, arithmetic and control flow instructions.
 
-
-
+		\section{Executables and binaries}
+			Binary files, although different for each operative system, all (more or less) follow a fixed schema to encode operations and data. Usually, this schema involves a DATA and a TEXT section, respectively for the data and the instructions; it usually has also a section where offsets in memory (to describe the memory structure \emph{of the program}) are stored. Usually (starting from the lowest and going to the highest memory addresses) this is the schema:
+			\begin{enumerate}
+				\item Shared libraries
+				\item .text
+				\item .bss
+				\item the heap (that grows \emph{towards high addresses})
+				\item the stack (that grows \emph{towards low addresses})
+				\item \emph{env}
+				\item \emph{argv}
+			\end{enumerate}
+			
 
 
 
