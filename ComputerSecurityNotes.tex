@@ -270,7 +270,7 @@
 			
 		\section{Vulnerabilities}
 			\subsection{Buffer Overflow}
-				Memory vulnerability, one of the most famous technique to exploit a software. Practically, it means that a piece of data is inserted in a buffer that is smaller. This enables the attacker to overwrite "sensitive" portion of the memory, and (in the worst case) inject malicious code.
+				Memory vulnerability, one of the most famous technique to exploit a software. Practically, it means that a piece of data is inserted in a buffer that is smaller. This enables the attacker to overwrite "sensitive" portion of the memory, and (in the worst case) inject malicious code. The thing that makes buffer overflow so dangerous is the way a buffer is allocated in 99\% of cases, so calling a function that does that: this allows the attacker to \emph{directly overwrite the return address from that function}.
 			
 	\part{Exercises and Examples}
 		\section{Exercises}
