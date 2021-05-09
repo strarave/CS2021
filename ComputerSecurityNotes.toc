@@ -44,22 +44,27 @@
 \contentsline {paragraph}{Compiler Level}{13}{}%
 \contentsline {paragraph}{OS Level}{13}{}%
 \contentsline {subsection}{\numberline {9.2}Format String}{13}{}%
-\contentsline {part}{V\hspace {1em}Web Security}{13}{}%
-\contentsline {section}{\numberline {10}What is Web Security?}{13}{}%
-\contentsline {subsection}{\numberline {10.1}Architectural View of an Attack}{13}{}%
-\contentsline {section}{\numberline {11}Filtering}{14}{}%
-\contentsline {subsection}{\numberline {11.1}Filtering Problems: Cross Site Scripting}{14}{}%
-\contentsline {paragraph}{Stored XSS}{14}{}%
-\contentsline {paragraph}{Reflected XSS}{14}{}%
-\contentsline {paragraph}{DOM based XSS}{14}{}%
-\contentsline {part}{VI\hspace {1em}Exercises and Examples}{14}{}%
-\contentsline {section}{\numberline {12}Exercises}{15}{}%
-\contentsline {subsection}{\numberline {12.1}Identity theft}{15}{}%
-\contentsline {subsection}{\numberline {12.2}Ransomware attack}{15}{}%
-\contentsline {subsection}{\numberline {12.3}Auto driving vehicles}{16}{}%
-\contentsline {part}{VII\hspace {1em}x86 assembly recap and pwndbg}{16}{}%
-\contentsline {section}{\numberline {13}Recap of software compiling}{16}{}%
-\contentsline {section}{\numberline {14}The x86 ISA}{16}{}%
-\contentsline {subsection}{\numberline {14.1}Data types}{17}{}%
-\contentsline {subsection}{\numberline {14.2}Instructions}{17}{}%
-\contentsline {section}{\numberline {15}Executables and binaries}{17}{}%
+\contentsline {subsubsection}{\numberline {9.2.1}Exploiting Format String Bug in a ANSI C Program}{13}{}%
+\contentsline {paragraph}{Format String in Practice}{14}{}%
+\contentsline {paragraph}{Writing Multiple Locations}{15}{}%
+\contentsline {subparagraph}{Quick Note on this Part}{15}{}%
+\contentsline {part}{V\hspace {1em}Web Security}{15}{}%
+\contentsline {section}{\numberline {10}What is Web Security?}{16}{}%
+\contentsline {subsection}{\numberline {10.1}Architectural View of an Attack}{16}{}%
+\contentsline {section}{\numberline {11}Filtering}{16}{}%
+\contentsline {subsection}{\numberline {11.1}Filtering Problems: Cross Site Scripting}{16}{}%
+\contentsline {paragraph}{Stored XSS}{16}{}%
+\contentsline {paragraph}{Reflected XSS}{17}{}%
+\contentsline {paragraph}{DOM based XSS}{17}{}%
+\contentsline {subsection}{\numberline {11.2}Content Security Policy}{17}{}%
+\contentsline {part}{VI\hspace {1em}Exercises and Examples}{17}{}%
+\contentsline {section}{\numberline {12}Exercises}{17}{}%
+\contentsline {subsection}{\numberline {12.1}Identity theft}{17}{}%
+\contentsline {subsection}{\numberline {12.2}Ransomware attack}{18}{}%
+\contentsline {subsection}{\numberline {12.3}Auto driving vehicles}{18}{}%
+\contentsline {part}{VII\hspace {1em}x86 assembly recap and pwndbg}{19}{}%
+\contentsline {section}{\numberline {13}Recap of software compiling}{19}{}%
+\contentsline {section}{\numberline {14}The x86 ISA}{19}{}%
+\contentsline {subsection}{\numberline {14.1}Data types}{19}{}%
+\contentsline {subsection}{\numberline {14.2}Instructions}{19}{}%
+\contentsline {section}{\numberline {15}Executables and binaries}{20}{}%
