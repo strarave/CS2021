@@ -375,9 +375,11 @@
 									\centering
 									\includegraphics[width = 0.9\textwidth]{./images/formatStringRecap2.png} 
 								\end{minipage}
-							\end{figure}						
-					
-	
+							\end{figure}
+			
+			\subsection{Final Remarks on Vulnerabilities}
+				The two vulnerabilities we've seen (format string and buffer overflow) are two common memory vulnerabilities that can be exploited to manipulate the behaviour of a system, tricking it into leaking information or worse, like executing malicious piece of software. These kind of vulnerabilities all originate from a "irresponsible" programmer that does not have in mind how a software can be exploited; however, against these vulnerabilities several countermeasures can be taken and put in place, and many of those eventually finish embedded in operating systems. What's more important is to consider safety a semi-functional requirements for software.
+
 	\part{Web Security}
 		\section{What is Web Security?}
 			The main difference between a "traditional" software attack and a web attack is often only the exposure of the app itself. This is also the motivation that renders the web attacks so impactful and web vulnerabilities so crucial to solve.
@@ -391,29 +393,65 @@
 				\end{enumerate}
 				HTTP connects the first two layers (and often also the two back ones). The statelessness of HTTP is also the major securty issue: it provides \emph{determinism} in the behaviour of the web applications. Also, it's text based; easy to counterfeit. 
 				
+				\subsubsection{The Untrustworthy Client}
+					The client is the only piece of software that the attacker can use, most of the times. The golden rule for web programming is to assume that \emph{all clients are attackers}, and thus give that part of the software the minimum power\footnote{With \emph{power} in this case is meant "possibility to harm". This usually translates in limiting as much as possible the client actions and doublecheck server side all the data that comes from them.} possible.
+				
 		\section{Filtering}
 			Filtering is the first line of defence wrt any kind of attack. It's obvious: if an attacker \emph{cannot add malicious stuff} or \emph{cannot even access dangerous services} it cannot harm. BUT filtering is hard: what do you filter? What do you blacklist? This is the classic filter system build:
 			\begin{enumerate}
 				\item Start with a whitelist approach (deny all except allowed)
 				\item Proceed "a regime" with a blacklist method (deny bad people)
-				\item Perform \emph{escaping}, so neutralize possible malicious inputs
+				\item Perform \emph{escaping}, so neutralize possible malicious inputs. This procedure is often referred to as "hygienizing input"
 			\end{enumerate}
 			Filtering also comes into play when it's time to separate the data from the executables: when the data can be executed, when it's just data?
 			
 			\subsection{Filtering Problems: Cross Site Scripting}
-				Cross Site Scripting (XSS) is a kind of attack that just occurs when \emph{data is not differentiated enough from code}. MSN allowed you to enter HTML an JS code into comments, but a JS-written comment will \emph{executed byb all the people that visit that page}. We can distinguish three type of XSS: Stored, Reflected and DOM-based XSSs.
+				Cross Site Scripting (XSS) is a kind of attack that just occurs when \emph{data is not differentiated enough from code}. MSN allowed you to enter HTML an JS code into comments, but a JS-written comment will \emph{executed by all the people that visit that page}. We can distinguish three type of XSS: Stored, Reflected and DOM-based XSSs.
 				
 				\paragraph{Stored XSS}
 					The MSN example. The attacker can memorize malicious code in the server and this is then propagated to other clients. This happens if the malicious code is not recognized as such; all the clients that download the malicious resource find valid code to be executed, and blindly execute it.
 					
 				\paragraph{Reflected XSS}
-					Reflected XSS does not rely on the server \emph{to memorize the exploit}: the attacker usually craft a malicious packet (or request, or site itself) and sends it directly to the victim. This request will \emph{trigger an existing vulnerability} in a site (that can also be totally unaware of it).
+					Reflected XSS does not rely on the server \emph{to memorize the exploit}: the attacker usually craft a malicious packet (or request) and sends it directly to the victim. This request will \emph{trigger an existing vulnerability} in a site (that can also be totally unaware of it). The classic attack of this kind exploits a site that \emph{does not hygienize the content it receives through a GET} and presents it as-is to the user; for the attacker it's enough to craft an ad-hoc request and have the user trigger it (mail attack).
 				
 				\paragraph{DOM based XSS}
-					DOM based attacks are similar to reflected attacks (in fact, the idea is the same; often also the implementation). The main difference is that the server is completely cut off from the attack: the reflection of the malicious code is handled by the \emph{client side code} such as javascript scripts built in pages. These kind of attacks are just pumped up reflected XSS attacks.
+					DOM based attacks are similar to reflected attacks (in fact, the idea is the same; often also the implementation). The main difference is that the server is completely cut off from the attack: the reflection of the malicious code is handled by the \emph{client side code} such as javascript scripts built in pages. The target page (the one that in classical reflected attacks actually \emph{hosts a vulnerability}) now can be totally embedded in the request. These kind of attacks are just pumped up reflected XSS attacks.
+					
+				\paragraph{XSS is Powerful}
+					JavaScript and other web scripting languages used in dynamic pages are built and executed with the client golden rule in mind: \emph{do not trust clients}. This does not mean that they cannot harm: they have access to personal information such as cookies, the session storage (and often the LocalStorage too) and they can perform \textbf{drive by downloads}\footnote{just issuing a download "fraudolently", that sends malicious code to the client.}.
 				
-			\subsection{Content Security Policy}
-				CSP is a HTTP based technique to reduce the possibility on XSS by enforcing the Same Origin Principle. It embeds into HTTP headers some indicators that lists which resources (and which origins, extensions, formats) are safe and which not. This measure is clever, but suffers the eternal engineering burden: how much is enough? When I'm filtering enough shit without breaking functionality? 
+			\subsection{Same Origin / Content Security Policy}
+				\paragraph{Same Origin Policy}
+					SOP is a principle implemented in all web clients, that enforces the "don't touch other's stuff" rule: all client side code loaded from origin A can access only to resources loaded from origin A. This simple policy can be bypassed in several ways, and the modern web programming paradigms are making circumventing this rule easier to attackers: it's not so rare that more sites share the local resources (in order to offer enhanced services) or that client side extensions inibits some of the security countermeasures of the browser itself.\\
+				
+				\paragraph{Content Security Policy}
+					CSP, instead, is a measure adopted \emph{by websites} that aims to mitigate XSS and other code injection attack by \emph{informing the web browser which are the secure contents} that can be trusted\footnote{so, loaded and executed} on that page. It's embedded in the HTTP headers of the response. The CSP is implemented by the majority of commercial browsers. CSP is a great mitigation for attacks, but:
+					\begin{enumerate}
+						\item writing the policies must be done by hand, and it's difficult
+						\item policies must be kept up to date
+						\item how many policies are enough? how many break functionalities (for example getting in the way of the loading of a library)?
+						\item how does CSP realate with browser extension? (same problem of SOP)
+					\end{enumerate}
+					
+		\section{Vulnerabilities and Attacks}
+			\subsection{SQL Injection}
+				Code injection attacks works all at the same way: they add (and then try to execute, or havo other execute it) malicious instructions in a place where these should not be, in order to harm a system. SQL injection is no different: the target this time are not-sanitized input fields in web forms,
+				
+				\subsubsection{Exploiting a Non Sanitized Form}
+					SQL injection is quite easy to understand: take for example a login form, for a newsletter, social network or service that is. The two basic fields to fill are username and password, and will be likely be inserted in a "users" table. \emph{If there's no filter to the input}, I can insert something like " username ';-- " in the username field. This will 
+					\begin{enumerate}
+						\item Close the string with the character '
+						\item Close the query with the character ;
+						\item comment the rest of the query with --
+					\end{enumerate}
+					If the system is simple enough to allow users in the system as soon as this query returns a value then I've successfully logged in withough a password!\\
+					Different attack can be performed: instead of commenting, I can inject an always-true condition in order to bypass the password checking (such as OR 1=1) or completely bypass the query system with a UNION attack: some DBMS actually consent to use set operators as UNION, INTERSECTION to filter query results, and this can be exploited by attackers to validate false information.
+					
+			\subsection{URL Tampering}
+				Another surface that's often vulnerable to attacks is the URL of the app we're using. For most web applications the URL is also a string the \emph{encodes the state of the application}, maybe even specifying the exact location (on the \textbf{server}) of the document displayed (this is valid for old directory-structured sites, but it's also true for complex modern applications with explicit parameters in the URL). 
+				
+				\subsubsection{Path Traversal Attack}
+					For old fashioned sites that are just HTML documents collection, the URL is the path on the server that identifies the desired page/document displayed. Again, if \emph{no filter} is present on the URL, nobody can stop an attacker to navigate through the filesystem of the server just by tampering the URL. 
 	
 	\part{Exercises and Examples}
 		\section{Exercises}
