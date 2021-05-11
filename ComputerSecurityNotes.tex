@@ -453,6 +453,13 @@
 				\subsubsection{Path Traversal Attack}
 					For old fashioned sites that are just HTML documents collection, the URL is the path on the server that identifies the desired page/document displayed. Again, if \emph{no filter} is present on the URL, nobody can stop an attacker to navigate through the filesystem of the server just by tampering the URL. 
 	
+			\subsection{Cookies!}
+				Cookies were born to help web sites build a user experience that was tailored to the \emph{single client}. The abuse of the cookies (as nowadays web) renders them a weapon of mass surveillance: every action can be stored in a cookie on the client and then accessed to model the client behaviour. 
+				
+				\subsubsection{Cross Site Request Forgery}
+					Forces an user to execute unwanted actions (state-changing action) on a web application in which he or she is currently authenticated with ambient credentials (e.g., with cookies).\\
+					So, this formal definition states that a CSRF exploits the \emph{client ambient credentials} to fake a set of action to perform on a site.
+	
 	\part{Exercises and Examples}
 		\section{Exercises}
 			\subsection{Identity theft}
