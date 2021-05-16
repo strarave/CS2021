@@ -454,12 +454,84 @@
 					For old fashioned sites that are just HTML documents collection, the URL is the path on the server that identifies the desired page/document displayed. Again, if \emph{no filter} is present on the URL, nobody can stop an attacker to navigate through the filesystem of the server just by tampering the URL. 
 	
 			\subsection{Cookies!}
-				Cookies were born to help web sites build a user experience that was tailored to the \emph{single client}. The abuse of the cookies (as nowadays web) renders them a weapon of mass surveillance: every action can be stored in a cookie on the client and then accessed to model the client behaviour. 
+				Cookies were born to help web sites build a user experience that was tailored to the \emph{single client}. The abuse of the cookies (as nowadays web) renders them a weapon of mass surveillance: every action can be stored in a cookie on the client and then accessed to model the client behaviour.
+				
+				\subsubsection{Cookies for Session Management}
+					Cookies are used to store information about the HTTP \emph{session}, a technique used by websites to keep track of the state of an interaction with a client. For example, to keep conversational data about a client, the server can generate a SessionID that than stores as a cookie on the client to identify it, and the data associated to it.\\
+					OBVIOUSLY these session tokens should be crafted in a way to not be exploitable:
+					\begin{itemize}
+						\item if used for authentication, not storing plaintext sensible data
+						\item if used for session identification they should not be "predictable"
+						\item they should have a clear (and near) expiration date that ALSO should not coincide with the cookie one
+					\end{itemize}
+					All these things must be kept in mind when designing session interaction in order to avoid impersonating attacks: if an attacker is able to spoof sensitive infos from the cookies he can easily impersonate someone else. 
 				
 				\subsubsection{Cross Site Request Forgery}
-					Forces an user to execute unwanted actions (state-changing action) on a web application in which he or she is currently authenticated with ambient credentials (e.g., with cookies).\\
-					So, this formal definition states that a CSRF exploits the \emph{client ambient credentials} to fake a set of action to perform on a site.
-	
+					Forces an user to execute unwanted actions (\underline{state-changing action}) on a web application in which he or she is currently authenticated with ambient credentials (e.g., with cookies).\\
+					So, this formal definition states that a CSRF exploits the \emph{client ambient credentials} to fake a set of action to perform on a site.\\
+					The classic CSRF attack can be carried out in 4 steps:
+					\begin{enumerate}
+						\item The victim signs in on a website that (for example) takes information from the client through a form that \emph{exploits ambient variables}.
+						\item The victim visits a malicious site (or clicks on a link)
+						\item The malicious site generates a fake request (following the form example, a well-crafted POST HTTP request is enough) and with XSS techniques make it execute on the victim web client
+						\item This way, the web client executes a malicious web request that \emph{fills out the original form} and it's able to get through because the original website uses the \emph{ambient variables} to authenticate the user
+					\end{enumerate}
+					
+					\begin{figure}[H]
+						\centering
+						\includegraphics[width = \textwidth]{./images/CSRF1.png}
+						\caption{Sequence diagram for a CSRF attack.}
+					\end{figure}
+					
+					\paragraph{CSRF Mitigation Techniques}
+						A first form of mitigation for this kinds of attacks is the CSRF token: a set of \emph{random challenge} tokens that are \emph{associated to the user's session} that are \underline{regenerated at each request}. These tokens are sent from the client to the server (but are not stored in the cookies) and the requests are "confirmed" only if the tokens (client-sent and server stored) match. This technique is called \emph{synchronizer token pattern}.\\\\
+						Another possible mitigation is the "Same Site Cookies" policy: from Wikipedia, "An additional 'SameSite' attribute can be included when the server sets a cookie, instructing the browser on whether to attach the cookie to cross-site requests. If this attribute is set to 'strict', then the cookie will only be sent on same-site requests, making CSRF ineffective. However, this requires the browser to recognise and correctly implement the attribute, and also requires the cookie to have the 'Secure' flag."
+	 
+	\part{Transport Layer Vulnerabilities and Attacks}
+		\section{Security at Network Layer}
+			In the internetworking scenario, the attacks are usually put in place targetting design issues of communication protocols, as UDP or TCP. These protocols are not "theoretically" vulnerable, but in order to work they expose information that can be used in a malicious way. Three kinds of attacks are studied in literature:
+			\begin{itemize}
+				\item Denial of Service (attack to availability)
+				\item Sniffing (attack to confidentiality)
+				\item Spoofing (attack to integrity and authenticity)
+			\end{itemize}
+			
+		\section{Denial of Service Attacks}
+			DoS attacks threaten the availability of an app or service. This can be done in multiple ways, depending on the level that is being attacked (the attacker can deny a service directly on the user's client, deny the access to the communication infrastructure that links client and service or directly making the service unavailable) or the kind of attack carried out.
+			
+			\subsection{Killer Packets}
+				\subsubsection{Ping o Death}
+					Killer packets attacks leverages errors is the \emph{protocol implementation} on certain OSs. The classic attack of this kind is the so called "ping of death": a pathological ICMP packet (pathological because "too large") that overflows the receiver buffer, causing it to crash. 
+				
+				\subsubsection{Teardrop}
+					Teardrop attacks exploits a vulnerability hidden in TCP packets, the possibility to specify the offset of the data segment of a fragmented packet\footnote{a TCP feature that enables splitting a network packet into multiple packets} in an inchoerent way, like overlapping packets. This makes impossible to reconstruct the original long packet, making the kernel hang or crash. 
+					
+				\subsubsection{Land Attack}
+					Little bit of history of hacking: Win95 was vulnerable to a particular type of attack that simply consists in crafting an IP packet with the source address equal to the destination address.
+					
+			\subsection{Flooding}
+				Flooding a network means saturate it with requests, above the bandwidth that the infrastructure can hold and manage. 
+				
+				\subsubsection{SYN flood}
+					SYN flood attacks exploits the way a three-way-handshake (the TCP method for estabilishing a connection) is designed. The server \emph{must hold the information} about all clients he's waiting an ack from. So, an attacker can saturate the server by never sending these. The attacker must use different IP addresses to do this (easy enough: a handful of seconds of spoofing gives you the most frequent IP addresses used on a network). This can be easily mitigated by moving the actor that holds the SYN information (storing a SYNcookie, of sorts).
+					
+			\subsection{Distributed Denial of Service}
+				Oppositely to the DoS classic attacks, DDoS attacks exploits a big infrastructure (such as a botnet) to saturate a network/infrastructure/service. The idea remains basically the same as the flooding attacks, but this time the "power factor" is the dimension of the attacker network instead of the use of the resources of the server. Notice how these attacks are \emph{far more difficult to mitigate} because if the hacker can put together a large enough attacking infrastructure there's no way to stop it.\\
+				The attacker can either use a network of computers at his disposal (botnets or C\&C infrastructures) or leverage an existing network, as the Smurf attack:
+				
+				\paragraph{Smurf Attack}
+					If the attacker can spoof the victim address (whichever address it may be) it can use it on a network for simply issuing an echo request with at "sender" the spoofed victim address. All the networks echo replies will be redirected to the victims, flooding it. This is a table that calculates the so called \emph{amplification factor} for each protocol.
+					\begin{figure}[H]
+						\centering
+						\includegraphics[width = \textwidth]{./images/SmurfAttack.png}
+						\caption{The bandwidth amplification factor (BAF) computes the bandwidth multiplier in terms of number of UDP payload bytes that an amplifier sends to answer a request, compared to the number of UDP payload bytes of the request.}
+					\end{figure}
+					
+		\section{Sniffing}
+			Sniffing is more a "hearing what's not destinated to you" kind of attack. It's a passive kind of attacks that aims only to retrieve information.
+		
+		\section{Spoofing}
+					
 	\part{Exercises and Examples}
 		\section{Exercises}
 			\subsection{Identity theft}
