@@ -531,7 +531,99 @@
 			Sniffing is more a "hearing what's not destinated to you" kind of attack. It's a passive kind of attacks that aims only to retrieve information.
 		
 		\section{Spoofing}
-					
+			\subsection{ARP Spoofing}
+				ARP is the protocol that converts IP addresses into lower level adddresses. To be fast (it's deisgned to be only fast) it's unauthenticated, with belief that authentication is done at higher levels. ARP just provides a request response broadcast service in a LAN to do this linking of addresses. ARP spoofing is rather easy: if an attacker detect an ARP request he can send a malicious ARP response in order to \emph{deviate traffic} to another direction, or just interrupt it. This kind of attacks are usually called "ARP poison" attacks.  
+				
+			\subsection{IP Spoofing}
+				The IP source address is not authenticated. This render the IP protocol extremely vulnerable to spoofing attacks. An attacker can spoof an address and use it as the source address in an UDP or ICMP packet. However, he won't be able to receive the responses! He can still sniff them tho...\\
+				For TCP protocol (due to the way the sequencing and the handshake are organized) things change. If the attacker can guess the InitialSequence Number he can \emph{blindly complete} a three way handshake, but here's the difficult part: guessing the semi random number chosen by the victim. This is quite difficult now but TCP sequence numbers were chosen with a very low randomness back in the 90s.\\
+				Where's the danger? \emph{Man in the middle} attack. A fully impersonating attack, the hacker can fake himself to be someone else and it's very difficult to tell the other way!
+				
+			\subsection{DNS Poisoning}
+				DNS poisoning attacks insert malicious name entries in the DNS server of a network, exploiting the non-authenticated update protocol of DNS. This is done by impersonating the higher level DNS server. This can be done to deviate traffic on a network.
+				
+			\subsection{Attacks against DHCP}
+				DHCP is the classic example of an unauthenticated protocol. An attacker can "easily" impersonate the DHCP server (by sniffing a DHCP request packet) and modify the IP address, the DNS and the default gateway of the victim. 
+	
+		\section{Transaction Security: SSL, TLS and SET}
+			Transactions are a mess. Securing a transaction is a badder mess. There's a trust issue (maybe multiple), a sensitive data issue, a timing issue, an atomicity issue, an authentication issue...\\
+			Two solutions exists, one more adopted than the other:
+			
+			\subsubsection{SET}
+				Secure Electronic Transaction is a protocol enforced by VISA and MasterCard to make the online transactions secure. The underlying idea is the "dual signature": a signature that combines two pieces of a message directed to two different recipients. The architecture can be described as:
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width = \textwidth]{./images/SET.png}
+				\end{figure}
+				SET failed because the implementation was very difficult to put in place, and also not fully transaprent. 
+	
+	\part{Secure Network Architecture}
+		\section{Firewalls}
+			Firewalls are network access control systems that verify all the packets flowing through them. Easy. This verification can be don at IP level (like Access Control Lists) or at transport layer (NAT level, to be precise).
+			
+			\paragraph{Firewall Cons}
+				Firewalls are perfect to filter traffic, but firewall positioning is a problem \emph{by itself}: a FW is totally useless if an attacker can go around it. Also, the firewall is usually a computer by itself: they're vulnerable by itself and can be cracked, put offline etc. Moreover, the configurability of the firewall renders it a victim of bad configuration issues: if we're adding the wrong rules we're restricting too much OR not restricting enough the network we're rying to protect.
+				
+			\subsection{Firewall Taxonomy}
+				\paragraph{Network Layer Firewall}
+					We can divide network layer firewalls in
+					\begin{itemize}
+						\item ACL. They just filter packets basing on static rules on the address or port, for example. ACL are very limited when it comes to detect attack that spans over multiple packets: they're old. They can perform only a static analysis that spans in detail up to the IP options enabled, and not fully even to TCP or UDP. 
+						\item Stateful packet filter firewalls. This kind of packet filters are an evolution of ACL, with added state: a stateful packet filter knows if a packet is in some way \emph{related} with the previous or the next one. These firewalls are much more powerful wrt ACL: the ability to detect exploits \emph{across packets} enables them to track connections and validate them. Also, \emph{there's almost no need for reflexive rules\footnote{response rules}}, because the state encapsulates it. Firewalls of this kind would alterthe ISN of TCP sessions in order to make more difficult to exploit a TCP packet for an attack, an will set "tolerance timers" on top of stateless protols (UDP) that simulates the "acceptance window" for a safe packet.
+					\end{itemize} 
+				
+				\paragraph{Application Layer Firewall}
+					At application level we can encounter
+					\begin{itemize}
+						\item Circuit level firewalls (legacy stuff). They act as a TCP level proxy.
+						\item Application proxies: circuit level firewalls, but on top of the stack. They're not transparent to the client: the connection should pass through the proxy every time, to inspect/verify/sanitize it. 
+					\end{itemize}
+		
+		\section{Architectures for Secure Networks}
+			\subsection{Multi Zone Architectures}
+				"Multi zone architectures" is the boring name for the \emph{castle approach} to network design; this relies on the assumption that all that's inside is good, all that's outside is harmful. However, the limit of this approach are evident: how can I safely allow external access to my network? Well, we can simply \emph{sectorize our internal citadel} into partitions that differs in the \emph{level of clearance needed to access}.\\
+				The classic multi zone architecture is divided in:
+				\begin{enumerate}
+					\item the internet
+					\item a tunnel of DMZs (demilitarized zone) that's an intermediate portion of the network: this partition is \emph{reachable from the public} and so all the machines in this zone \emph{should not be trusted}. We can put several of them "in series" between th einside and the outside
+					\item an internal private network (that can be furtherly divided)
+				\end{enumerate}
+				ALL THESE LEVEL ARE SEPARATED BY DIFFERENT FIREWALLS that are configured in different ways.
+				
+			\subsection{Virtual Private Network}
+				VPNs are a threath to pure castle-approach structured networks. They in fact open a tunnel through them.
+				
+				\paragraph{Full Tunnelling}
+					ALL traffic generated by a VPN connected host pass through the local area network of the organization, allowing him to benefit of the internal resources (among the others: the \emph{firewall}).
+				
+				\paragraph{Split Tunnelling}
+					"Local" traffic is redirected inside the organization's LAN, while the Internet traffic is left to the ISP to carry out. This actually open a door on a LAN. This modality is the most dangerous to a network that relies on a castled approach. 
+	
+	\part{Malicious Software}
+		\section{Malwares}
+			What are malwares? Mal(icious soft)wares are \emph{programs that are explicitly written to violate a security policy} or more in general, \emph{harm a system}.
+			
+			\subsection{Categories of Malwares}
+				Malwares can have several features and objectives. We can classify them basing on these traits:
+				\begin{itemize}
+					\item Viruses: self propagating piece of code
+					\item Worms: self propagating \emph{program}
+					\item Trojans: virus "in disguise"
+				\end{itemize}
+				
+		\section{Lifecycle of a Malware}
+			The life of a malware is divided in 4 main stages:
+			
+			\paragraph{Reproduce and Infect}
+				In these first two phases the malware is reproducing the logic under it and must not be detected. The tradeoff here is infection speed (or broad) vs detection probability. Nowadays, the spreading vector is something not necessarily hidden in the code, but more a known vulnerability or a social engineering attack. Several infection techniques are used: some viruses hides in the master boot record of computers or in the boot partitions. Or simply modify neighbouring files (like multicavity viruses, that inject code in unused region of program code).\\
+				Another method is hiding in a macro: an innocent like document can transform in a weapon if a macro is inserted (and blindly executed). 
+				
+			\paragraph{Hide}
+				More than a phase, a \emph{condition}: as already mentioned, being hidden equals not being detected, that's fundamental for a malware. There are plenty of techniques to stay hidden: hiding in macros, being polyglot etc. 
+				
+			\paragraph{Deliver Payload}
+				Well: deliver payload. Take a bunnch of harmful code and execute it where the virus had reached. 
+	
 	\part{Exercises and Examples}
 		\section{Exercises}
 			\subsection{Identity theft}
