@@ -3,6 +3,7 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{array}
 
 \title{Computer Security}
 \author{Elia Ravella}
@@ -14,7 +15,7 @@
 	\tableofcontents
 	\clearpage
 	
-	\part{Introduction} 
+	\clearpage \part{Introduction} 
 		%% shellcoder's handbook, C. Anley and J. Heasman
 		\section{Security}
 			What is security? First, we need to distinguish \emph{security} itself and \emph{safety}; the first represents a system that protects from the outside, the second a system that does not harm when it's used.
@@ -48,7 +49,7 @@
 			
 			
 				
-	\part{Cryptography}
+	\clearpage \part{Cryptography}
 		\section{Cryptography, cryptoanalisys, cryptology}
 			Cryptography is the building of secure mathematical systems. Cryptoanalisys is the discipline of analyzing such systems, and trying to break them. Cryptology is the union of both.\\
 			Cryptography \emph{as a discipline} was formalized by Claude Shannon in 1949. The (still actual) formalization of a cryptosystem is composed of 3 main components:
@@ -136,7 +137,7 @@
 					Classic digital signature mechanism: an hash function produces a digest of a document, that's then encrypted with the private key of the sender. The receiver (to both check for identity of the sender and the integrity of the document) does the same: hashes the document and produces a digest, that's then compared with the decrypted version of the received one.\\
 					A big issue in this case is "who to trust". To estabilish a list of trusted elements the current infrastructure relies on Certification Authorities, a tree-like structure (a hierarchical group) of entities that each signs with a trusted key (a trusted role) the certificates.
 			
-	\part{Authentication}
+	\clearpage \part{Authentication}
 		\section{Identification and Authentication}
 			What's the difference between identification and authentication? The first represents the act of "telling your identity". Authentication means to \emph{proof} the stated identity. Authentication must be \emph{bidirectional} or \emph{mutual}: both entities must acknowledge each other identity and the proof.
 			
@@ -238,7 +239,7 @@
 			\subsection{Role Based Access Control}
 				RBAC is kinda a hybrid of DAC and MAC, and can also enforce them: if configured in the right way, it can act as a DAC or as a MAC. The idea is similar to the one that driven MAC design ("no self assigning dynamic priviledges") but the roles are no more structured in a rigid hierarchy but instead are simply \emph{a label to a set of priviledges}.
 					
-	\part{Software Security}		
+	\clearpage \part{Software Security}		
 		\section{What is software security?}
 			With "software security" is intended the meeting of the non-functional requirement (obviously for a software) of \emph{being secure}. This is often overlooked in the process of software developing, but to remind the importance of this non functional requirement, it's sufficient to think about the name of the unmet security specifications: \textbf{vulnerability}.\\
 			Recap on definitions:
@@ -272,13 +273,6 @@
 		\section{Vulnerabilities}
 			\subsection{Buffer Overflow}
 				Memory vulnerability, one of the most famous technique to exploit a software. Practically, it means that a piece of data is inserted in a buffer that is smaller. This enables the attacker to overwrite "sensitive" portion of the memory, and (in the worst case) inject malicious code. The thing that makes buffer overflow so dangerous is the way a buffer is allocated in 99\% of cases, so calling a function that does that: this allows the attacker to \emph{directly overwrite the return address from that function}.
-				
-				\subsubsection{Buffer Overflow HowTo}
-					\begin{enumerate}
-						\item Find the right address
-						\item Create the shellcode
-						\item Insert a nop sled
-					\end{enumerate}
 					
 				\subsubsection{Buffer Overflow Defense}
 					Defending against buffer overflow means defending against a super powerful type of vulnerabilities that can harm a whole software. This kind of defense can be put in place in three main regions:
@@ -325,62 +319,13 @@
 					First of all, we can build a "memory scanner" with just "\%N\$x" and iterating over N: this will print the hexadecimal code of all the "arguments" (memory slots) after the one passed as an argument. Remember, we're sure to be on the stack of the application, because this bug targets \emph{printing functions}, and the exploit string will be the parameter of such function. This is already a vulnerability: we can exploit this to make tha pplication leak information by \emph{directly accessing its memory space}.\\
 					To also write, obviously we need to use \%n. We must combine the character-generating placeholder \%Nc and the target-sniping placeholder N\$ in order to obtain the right alignement of the memory and to write \emph{exactly there}. This also highlights the main difference between a buffer overflow vulnerabilty and a format string one: while the BOF acts as a tank overwriting all the memory it traveses, the format string modify exactly the portion of memory needed, leaving the rest unchanged. 
 					
-					\paragraph{Format String in Practice}
-						What we need:
-						\begin{itemize}
-							\item A target address, the one that represents the block of memory \emph{to be overwritten};
-							\item An arbitrary piece of data (could be another address, an arbitrary number, a set of flags...) \emph{that we want to write in memory}
-						\end{itemize}
-						What do we need to do:
-						\begin{enumerate}
-							\item suppose we already know the target address of the memory portion to tamper, we need to put this address \emph{exactly} in the position that the \%n will point. To do so, we use the memory-scanner we've presented previously, to finde the offset of it. For now, our string is composed only by the target address.
-							\item at this point we need to introduce in our malicious string the data we want to write. To do so, we concatenate the target address with the malicious data generated by the \%Nc placeholder. We now have, as exploit string, "hex of target address + \% (malicious data in decimal - address dimension) c".
-							\item lastly, we need to combine the previous step with the writing placeholder \%n. Where do we write (so, which value do I insert in the N\$ parameter of the placeholder)? We need to write in the target address \\$\Rightarrow$ we have put the target address on the stack\\$\Rightarrow$ we have discovered the offset of such address by scanning the memory\\$\Rightarrow$ we put that offset here.
-						\end{enumerate}
-						Our final string is something resembling
-						\begin{equation}
-							\begin{cases}
-								\text{target address } TA\\
-								\text{malicious data } MD\\
-								\text{offset of the target address } OFF\\
-							\end{cases}
-							\Rightarrow TA \,\%MD\, c\%\,OFF\,\$n 
-						\end{equation}
-						So a valid exploit could be "\textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92\%420c3n": it writes "420" in the \textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92 memory cell, and the address is memorized as third parameter after the function.
-						
-					\paragraph{Writing Multiple Locations}
-						What if, for example, we want to write into memory (as the malicious data) a valid address, and this address occupies more than one word? Can we write \emph{multiple times} with the same exploit? Yes sir we can. This procedure involves a little bit of additional math, but it's pretty straightforward. First of all, the abstract of the metod: \emph{we use two times th \%N\$n writing mechanism putting two consecutive addresses on the memory, as parameters for N\$}. Whats the problem here? The problem here is that the second write is bounded to go \emph{over} (address speaking) the first one. So, we need to split our malicious data in two part, and write first the "litle" (in module) part.\\
-						More difficult said than done, trust me. It's very intuitive: the \%Nc placeholder can elongate the string of N characters, then (if we repeat the mechanism afterwards, \%Mc) add another M characters. Oviously, M cannot be less than zero, so we need to write \emph{first} the "lower" (in absolute value) part of the malicious data and then the "higher" (as remaining part).\\
-						The final exploit turns out to be something like
-						\begin{equation}
-							\begin{cases}
-								\text{target addresses } TA, \,TA+1\\
-								\text{malicious data } MD\\
-								\text{offset of the target address } OFF, \,OFF+1\\
-							\end{cases}
-						\end{equation}
-						\begin{equation}
-							(TA) (TA+1) \,\%low\vert\,MD\,\vert\, c\%(OFF)\$n\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$n
-						\end{equation}
-						
-						\subparagraph{Quick Note on this Part}
-							So I think I was not totally accurate in writing these notes, so I'll put the professor recap from \emph{his slides} right here in the notes.
-							\begin{figure}[H]
-								\centering
-								\begin{minipage}{0.45\textwidth}
-									\centering
-									\includegraphics[width = 0.9\textwidth]{./images/formatStringRecap1.png}
-								\end{minipage}\hfill
-								\begin{minipage}{0.45\textwidth}
-									\centering
-									\includegraphics[width = 0.9\textwidth]{./images/formatStringRecap2.png} 
-								\end{minipage}
-							\end{figure}
-			
+				\subsubsection{Format String Defence}
+					Being another memory vulnerability, many of the solutions explained for the buffer overflow are still valid. Being the format string dependant strictly on some printing functions, it can be easily patched by modifying this very functions (indeed, a secure version of libc exists). Moreover, compilers have learnt to detect "unsafe calls" to printing functions and signal them.
+					
 			\subsection{Final Remarks on Vulnerabilities}
 				The two vulnerabilities we've seen (format string and buffer overflow) are two common memory vulnerabilities that can be exploited to manipulate the behaviour of a system, tricking it into leaking information or worse, like executing malicious piece of software. These kind of vulnerabilities all originate from a "irresponsible" programmer that does not have in mind how a software can be exploited; however, against these vulnerabilities several countermeasures can be taken and put in place, and many of those eventually finish embedded in operating systems. What's more important is to consider safety a semi-functional requirements for software.
 
-	\part{Web Security}
+	\clearpage \part{Web Security}
 		\section{What is Web Security?}
 			The main difference between a "traditional" software attack and a web attack is often only the exposure of the app itself. This is also the motivation that renders the web attacks so impactful and web vulnerabilities so crucial to solve.
 			
@@ -487,7 +432,7 @@
 						A first form of mitigation for this kinds of attacks is the CSRF token: a set of \emph{random challenge} tokens that are \emph{associated to the user's session} that are \underline{regenerated at each request}. These tokens are sent from the client to the server (but are not stored in the cookies) and the requests are "confirmed" only if the tokens (client-sent and server stored) match. This technique is called \emph{synchronizer token pattern}.\\\\
 						Another possible mitigation is the "Same Site Cookies" policy: from Wikipedia, "An additional 'SameSite' attribute can be included when the server sets a cookie, instructing the browser on whether to attach the cookie to cross-site requests. If this attribute is set to 'strict', then the cookie will only be sent on same-site requests, making CSRF ineffective. However, this requires the browser to recognise and correctly implement the attribute, and also requires the cookie to have the 'Secure' flag."
 	 
-	\part{Transport Layer Vulnerabilities and Attacks}
+	\clearpage \part{Transport Layer Vulnerabilities and Attacks}
 		\section{Security at Network Layer}
 			In the internetworking scenario, the attacks are usually put in place targetting design issues of communication protocols, as UDP or TCP. These protocols are not "theoretically" vulnerable, but in order to work they expose information that can be used in a malicious way. Three kinds of attacks are studied in literature:
 			\begin{itemize}
@@ -555,9 +500,31 @@
 					\centering
 					\includegraphics[width = \textwidth]{./images/SET.png}
 				\end{figure}
-				SET failed because the implementation was very difficult to put in place, and also not fully transaprent. 
+				SET failed because the implementation was very difficult to put in place, and also not fully transaprent. The main problem was the requirement of a digital certificate \emph{also for the client}: let's say it's not the most scalable solution. 
+				
+			\subsubsection{HTTPS}
+				HTTP over Secure Software Level is the de facto standard for the secured internet communication. SSL is the name for the previous versions of TLS (all TLS version behind 1.2 are deprecated at this time).\\
+				TLS (the actual securing protocol) redesigns the classic HTTP handshake, adding the "secure suit selection" part: this first part is issued by the client, that at first connections \emph{tells the server which are his preferences for}
+				\begin{itemize}
+					\item key exchange algorithm
+					\item bulk encryption algorithm
+					\item message authetication code algorithm
+					\item random number generation function used
+				\end{itemize}
+				At every voice in the cipher suit is associated a preference level, and the server sends back the configuration of algorithms to use for the communication basing his decision on this preference level. In the server response it also sends his certificates. \emph{TLS also supports client authentication}, so it allows the client to reply with his own certificate set. The handshake can be summarized as so:
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width = \textwidth]{./images/TLS.png}
+				\end{figure}
+				
+				\paragraph{Man in the Middle Attacks}
+					TLS is designed to be resistant to MitM attacks: what an attacker can do to impersonate the server is cut out from the handshake
+					\begin{itemize}
+						\item He cannot let the original server certificate go through, because he won't be able to be trusted
+						\item He cannot send a fake certificate, the client can easily notice
+					\end{itemize}
 	
-	\part{Secure Network Architecture}
+	\clearpage \part{Secure Network Architecture}
 		\section{Firewalls}
 			Firewalls are network access control systems that verify all the packets flowing through them. Easy. This verification can be don at IP level (like Access Control Lists) or at transport layer (NAT level, to be precise).
 			
@@ -599,7 +566,7 @@
 				\paragraph{Split Tunnelling}
 					"Local" traffic is redirected inside the organization's LAN, while the Internet traffic is left to the ISP to carry out. This actually open a door on a LAN. This modality is the most dangerous to a network that relies on a castled approach. 
 	
-	\part{Malicious Software}
+	\clearpage \part{Malicious Software}
 		\section{Malwares}
 			What are malwares? Mal(icious soft)wares are \emph{programs that are explicitly written to violate a security policy} or more in general, \emph{harm a system}.
 			
@@ -610,6 +577,7 @@
 					\item Worms: self propagating \emph{program}
 					\item Trojans: virus "in disguise"
 				\end{itemize}
+				Computer viruses were first created as a proof of concept for programs that auto replicate or modifies on their own. The security problem was understood later. An interesting theoretica result is the formal impossibility to build a perfect virus detector: this problem can be seen as a formulation of the halting problem (still undecible while I'm writing). 
 				
 		\section{Lifecycle of a Malware}
 			The life of a malware is divided in 4 main stages:
@@ -622,116 +590,200 @@
 				More than a phase, a \emph{condition}: as already mentioned, being hidden equals not being detected, that's fundamental for a malware. There are plenty of techniques to stay hidden: hiding in macros, being polyglot etc. 
 				
 			\paragraph{Deliver Payload}
-				Well: deliver payload. Take a bunnch of harmful code and execute it where the virus had reached. 
+				Well: deliver payload. Take a bunch of harmful code and execute it where the virus had reached. 
 	
-	\part{Exercises and Examples}
-		\section{Exercises}
-			\subsection{Identity theft}
-				Which are the risk components in the scenario of identity theft, like in social media platforms?
+		\section{Defending from a Malware}
+			Malwares are a problem. They can harm everything related to software, from the hardware itself, to communications, to assets, to public images. Defending against them is necessary: we see three main approaches.
+			\begin{itemize}
+				\item Software maintainance: often viruses exploits known software vulnerabilities. Patching them (and updating the softwares in general) makes the environment less exploitable from an attacker
+				\item Malware signatures: so far one of the most utilized techniques to recognize malicious software. A program can be "recognized" from his signature (usually an hash derived from his bytecode). This enables antivirus to detect malicious softwares and block them.
+				\item Behavioral and static executable analysis: viruses can worms can be recognized also by "known bad software practices" that are usually exploited, like the utilization of some known vulnerable library or the exhibition of a suspicious behaviour at runtime
+			\end{itemize}
+			
+			\subsection{Known Malicious Behaviours}
+				Not all (known) patterns of execution of malwares are easily detectable or static:
+				\begin{itemize}
+					\item A program can be polymorphic or metamorphic, so be able to modify itself at runtime (for example inserting random dead code or on the fly code reordering)
+					\item A malware can be dormant, and waiting for particular conditions to be met: a particular time, a trigger...
+					\item Anti virtualization technique can be deployed: a program could \emph{detect} when it's being debugged and change his behaviour
+					\item An evolution of polymorphism introduced encryption techniques to avoid being detected
+					\item Rootkits: rootkits defines an approach to hacking a machine. A rootkit is a set of tool that "implants a root user" on a machine. This root user can then use other pieces of the rootkit itself to harm the system itself. I like more the Wikipedia definition though\footnote{\emph{A rootkit is a collection of computer software, typically malicious, designed to enable access to a computer or an area of its software that is not otherwise allowed (for example, to an unauthorized user) and often masks its existence or the existence of other software.}}.
+				\end{itemize}
+	
+	\clearpage \part{Exercises tips and notes}
+		\section{Binary Exploits}
+			\subsection{Buffer Overflows}
+				For buffer overflows, we need to keep in mind how the stack is organized when a function is called. When function F calls functions D, in order, we have\footnote{in the reference architecture, so a GCC compiled C code with target a 32 bit machine, with all the options for debug and security disabled}:
 				\begin{enumerate}
-					\item Reputation threathened both of the victim and the company
-					\item Social engineering attacks
-					\item Malicious spread of information
+					\item Arguments in reverse order
+					\item The instruction pointer of F
+					\item The base pointer of F (this address will be the new base pointer)
+					\item The local variables of D:
+						\begin{itemize}
+							\item if standard types, in order
+							\item if structs, the field are allocated in reverse order
+							\item if vectors, allocated from the last element
+						\end{itemize}
 				\end{enumerate}
-				And the assets?
+				Remember: \emph{stack grows towards smaller addresses}.
+				
+				\paragraph{Building the exploit}
+					To exploit a buffer overflow vulnerability, we need to
+					\begin{enumerate}
+						\item Identify which variables we can control
+						\item Find the one initialized without check
+						\item Calculate how many bytes we have to overwrite in order to modify the return address of the function
+						\item Using this information to substitute the saved return address with one "known", possibly insert a nop sled\footnote{A series of null operations (nop) to "nullify" a portion of memory.} to be sure
+						\item The resulting exploit will 99\% look like a sequence of nop followed by the actual exploit and an address targeting somewhere in the nop sled
+					\end{enumerate}
+					Something to watch out: sometimes this string must contain a certain type of parameter, so watch out for other controls!
+				
+				\paragraph{Constants}
+					In the referenced architecture, these are the usual values for the system variable types / general dimensions
+					
+					\begin{center}
+						\begin{tabular}{ |c|c|c|}
+							\hline
+							Type & Size in bits & Size in bytes \\
+							\hline
+							\hline
+							Word (memory location length) & 32 & 4\\
+							Pointer (and registers) & 32 & 4 \\
+							Integer & 32 & 4 \\
+							Char & 8 & 1 \\
+							Structs & (sum of bits of fields) & (sum of bytes of fields)\\
+							\hline 
+						\end{tabular}
+					\end{center}
+					
+			\subsection{Format String}
+				\subsubsection{Remainder: Exploiting Format String Bug in a ANSI C Program}
+					We have several placeholders and placeholders extensions we can use to make a format string vulnerability super dangerous.\\
+					Placeholders:
+					\begin{enumerate}
+						\item \%d and \%i to print integers
+						\item \%u to print unsigned decimals
+						\item \%X and \%x to print unsigned hexadecimals
+						\item \%o for octals
+						\item \%c for chars, \%s for strings
+					\end{enumerate}
+					Placeholder modifiers (of interest):
+					\begin{enumerate}
+						\item N\$: if inserted between the \% and the placeholder character tells the formatter to go to the N-th parameter.
+						\item \%n: this placeholder \emph{writes the number of chars printed} so far to the address pointed \emph{by the argument}. The important thing is: whatever value is in the memory \emph{where the argument is searched}, it will be interpeted as a memory location. We will also use his brother \%hn, that writes a shortint.
+						\item also, the \%c placeholders for chars can be extended as \%Nc where N is the number of times the first char argument must be prented.
+					\end{enumerate}
+					So, how do we exploit this?\\
+					First of all, we can build a "memory scanner" with just "\%N\$x" and iterating over N: this will print the hexadecimal code of all the "arguments" (memory slots) after the one passed as an argument. Remember, we're sure to be on the stack of the application, because this bug targets \emph{printing functions}, and the exploit string will be the parameter of such function. This is already a vulnerability: we can exploit this to make tha pplication leak information by \emph{directly accessing its memory space}.\\
+					To also write, obviously we need to use \%n. We must combine the character-generating placeholder \%Nc and the target-sniping placeholder N\$ in order to obtain the right alignement of the memory and to write \emph{exactly there}. This also highlights the main difference between a buffer overflow vulnerabilty and a format string one: while the BOF acts as a tank overwriting all the memory it traveses, the format string modify exactly the portion of memory needed, leaving the rest unchanged. 
+					
+					\paragraph{Format String in Practice}
+						What we need:
+						\begin{itemize}
+							\item A target address, the one that represents the block of memory \emph{to be overwritten};
+							\item An arbitrary piece of data (could be another address, an arbitrary number, a set of flags...) \emph{that we want to write in memory}
+						\end{itemize}
+						What do we need to do:
+						\begin{enumerate}
+							\item suppose we already know the target address of the memory portion to tamper, we need to put this address \emph{exactly} in the position that the \%n will point. To do so, we use the memory-scanner we've presented previously, to finde the offset of it. For now, our string is composed only by the target address.
+							\item at this point we need to introduce in our malicious string the data we want to write. To do so, we concatenate the target address with the malicious data generated by the \%Nc placeholder. We now have, as exploit string, "hex of target address + \% (malicious data in decimal - address dimension) c".
+							\item lastly, we need to combine the previous step with the writing placeholder \%n. Where do we write (so, which value do I insert in the N\$ parameter of the placeholder)? We need to write in the target address \\$\Rightarrow$ we have put the target address on the stack\\$\Rightarrow$ we have discovered the offset of such address by scanning the memory\\$\Rightarrow$ we put that offset here.
+						\end{enumerate}
+						Our final string is something resembling
+						\begin{equation}
+							\begin{cases}
+								\text{target address } TA\\
+								\text{malicious data } MD\\
+								\text{offset of the target address } OFF\\
+							\end{cases}
+							\Rightarrow TA \,\%MD\, c\%\,OFF\,\$n 
+						\end{equation}
+						So a valid exploit could be "\textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92\%420c3n": it writes "420" in the \textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92 memory cell, and the address is memorized as third parameter after the function.
+						
+					\paragraph{Writing Multiple Locations}
+						What if, for example, we want to write into memory (as the malicious data) a valid address, and this address occupies more than one word? Can we write \emph{multiple times} with the same exploit? Yes sir we can. This procedure involves a little bit of additional math, but it's pretty straightforward. First of all, the abstract of the metod: \emph{we use two times th \%N\$n writing mechanism putting two consecutive addresses on the memory, as parameters for N\$}. Whats the problem here? The problem here is that the second write is bounded to go \emph{over} (address speaking) the first one. So, we need to split our malicious data in two part, and write first the "litle" (in module) part.\\
+						More difficult said than done, trust me. It's very intuitive: the \%Nc placeholder can elongate the string of N characters, then (if we repeat the mechanism afterwards, \%Mc) add another M characters. Oviously, M cannot be less than zero, so we need to write \emph{first} the "lower" (in absolute value) part of the malicious data and then the "higher" (as remaining part).\\
+						The final exploit turns out to be something like
+						\begin{equation}
+							\begin{cases}
+								\text{target addresses } TA, \,TA+1\\
+								\text{malicious data } MD\\
+								\text{offset of the target address } OFF, \,OFF+1\\
+							\end{cases}
+						\end{equation}
+						\begin{equation}
+							(TA) (TA+1) \,\%low\vert\,MD\,\vert\, c\%(OFF)\$n\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$n
+						\end{equation}
+						
+						\subparagraph{Quick Note on this Part}
+							So I think I was not totally accurate in writing these notes, so I'll put the professor recap from \emph{his slides} right here in the notes.
+							\begin{figure}[H]
+								\centering
+								\begin{minipage}{0.45\textwidth}
+									\centering
+									\includegraphics[width = 0.9\textwidth]{./images/formatStringRecap1.png}
+								\end{minipage}\hfill
+								\begin{minipage}{0.45\textwidth}
+									\centering
+									\includegraphics[width = 0.9\textwidth]{./images/formatStringRecap2.png} 
+								\end{minipage}
+							\end{figure}
+		
+		\section{Web Vulnerabilities}
+			\subsection{Cross Site Scripting}
+				It's important to recognize the XSS vulenrrability we're working with. Here's a list of signals you can look after for each XSS vulns we've seen
+				\begin{center}
+					\begin{tabular}{ | m{5cm} || m{5em} | m{5em} | m{5em} |}
+						\hline
+						Type of error & Stored XSS & Reflected XSS & DOM-Based XSS \\
+						\hline
+						\hline
+						Unchecked insertion of data in the database & X & & \\
+						\hline
+						Unchecked write of content to the client \emph{from DB} & X & & \\
+						\hline
+						Unchecked write of content to the client \emph{from client itself} & & X & X \\
+						\hline
+						Unchecked write of content to the client \emph{using a client side technology} & & & X \\
+						\hline							
+					\end{tabular}
+				\end{center}
+				
+			\subsection{Cross Site Request Forgery}
+				In order to have a CSRF, some conditions are necessary:
 				\begin{enumerate}
-					\item reputation
-					\item money
-					\item personal information
+					\item cookies used somewhere
+					\item state changing actions
+					\item "automation" of user interaction through ambient variables (usually cookies, or sessionstorage)
 				\end{enumerate}
-				And who are the threat agents?
+				What to remember for a valid CSRF attack: it \emph{99\% of the cases} involves 3 parties: these are the attacker, a \emph{target website} and the client.
+				
+			\subsection{SQL Injection}
+				To spot an SQL injection type of vulnerability is enough to see if there's some unchecked insertion in the database, some unsanitized input. Usually the countermeasures used are
+				\begin{itemize}
+					\item SQL prepared statements, that converts all inputs to string
+					\item Client side input sanitizing (easily disabled)
+					\item Server side input sanitizing 
+				\end{itemize}
+				This kind of attacks usually require to extract some information from a DB; an SQLi injection exploit follows a rigid structue
 				\begin{enumerate}
-					\item People around you
-					\item Government
-					\item etc
-				\end{enumerate}
-				So \emph{everybody} with a malicious intent\\
-				Why is this scenario possible, and how to mitigate it?
-				\begin{enumerate}
-					\item 2FA
-					\item trusted device based auth
-					\item enforce credentials strongness
+					\item a string terminator (apice or double apices) that is used to cloe the parameter that can be exploited
+					\item either a modified or additional condition to manipulate a \verb|WHERE| clause, where usually the parameters are inserted
+					\item either a 
+						\begin{itemize}
+							\item query terminator plus comment symbol
+							\item UNION clause
+						\end{itemize}
 				\end{enumerate}
 				
-			\subsection{Ransomware attack}
-				A small company specialized in a particular object is infected by a ransomware\\
-				What are the threats, the asset at risk and the possible countermeasures?\\
-				First:
-				\begin{itemize}
-					\item data loss
-					\item data of the company
-					\item offline backups
-				\end{itemize}
-				Second:
-				\begin{itemize}
-					\item data leakage
-					\item data of the company
-					\item encryption
-				\end{itemize}
-				Third:
-				\begin{itemize}
-					\item denial of service
-					\item production
-					\item redundancy
-				\end{itemize}
-				Who are the possible threat agents? Cuncurrent companies, ex internal employees, ransomers...
-				
-			\subsection{Auto driving vehicles}
-				Consider auto driving cars used as taxies.\\
-				Which are the most valuable assets in this scenario?
+		\section{Secure Network Architectures}
+			\subsection{ACLs and Firewall Rules}
+				Classic approach to firewall rules in general:
 				\begin{enumerate}
-					\item People inside the car
-					\item People outside the car
-					\item the vehicle itself
-				\end{enumerate}
-				What are the attack surfaces on the vehicles?
-				\begin{enumerate}
-					\item The VEHICLE itself, you enter there!
-					\item the connectivity capabilities of the vehicle
-					\item the company network, or the internet itself (it was an hypothesis)
+					\item deny all
+					\item allow selected
+					\item (additional) add reflection rules to allow symmetric communication
 				\end{enumerate}
 				
-	\part{x86 assembly recap and pwndbg}
-		\section{Recap of software compiling}
-			Code is translated by the compiler in Assembly code that is the assembled in binary code. That's the workflow. The process is theoretically not reversible, it can be reconduced to the halting problem. This is due to the loss of information (for example about types in the first step) that the process introduces.
-			
-		\section{The x86 ISA}
-			64 bit CISC architecture for original Intel processors.\\
-			Register file:
-			\begin{enumerate}
-				\item EAX EBX ECX EDX
-				\item ESI EDI for strings
-				\item EBP ESP base and stack pointers
-				\item EIP instruction pointer, never explicitly accessed
-				\item EFLAGS program status and control 
-			\end{enumerate}
-			The "E" before the register name stands for "extended" and references the 64 bit version of the register. Omitting it will access the 32 bit version.
-			
-			\subsection{Data types}
-				Four main "data types"
-				\begin{enumerate}
-					\item Byte - 8 bit
-					\item Word - 2 Bytes
-					\item Dword - 2 Words
-					\item Qword - 4 Words
-				\end{enumerate}
-			
-			\subsection{Instructions}
-				Instructions in x86 have \emph{variable lenght} ranging from 1 byte to 16 bytes. Every instruction is composed of the opcode (representing the operation) and the operand list. We'll be using logic, memory, arithmetic and control flow instructions.
-
-		\section{Executables and binaries}
-			Binary files, although different for each operative system, all (more or less) follow a fixed schema to encode operations and data. Usually, this schema involves a DATA and a TEXT section, respectively for the data and the instructions; it usually has also a section where offsets in memory (to describe the memory structure \emph{of the program}) are stored. Usually (starting from the lowest and going to the highest memory addresses) this is the schema:
-			\begin{enumerate}
-				\item Shared libraries
-				\item .text
-				\item .bss
-				\item the heap (that grows \emph{towards high addresses})
-				\item the stack (that grows \emph{towards low addresses})
-				\item \emph{env}
-				\item \emph{argv}
-			\end{enumerate}
-			
-
-
-
+				
 \end{document}
