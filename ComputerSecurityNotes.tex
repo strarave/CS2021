@@ -719,14 +719,12 @@
 							So I think I was not totally accurate in writing these notes, so I'll put the professor recap from \emph{his slides} right here in the notes.
 							\begin{figure}[H]
 								\centering
-								\begin{minipage}{0.45\textwidth}
-									\centering
-									\includegraphics[width = 0.9\textwidth]{./images/formatStringRecap1.png}
-								\end{minipage}\hfill
-								\begin{minipage}{0.45\textwidth}
-									\centering
-									\includegraphics[width = 0.9\textwidth]{./images/formatStringRecap2.png} 
-								\end{minipage}
+								\includegraphics[width = \textwidth]{./images/formatStringRecap1.png}
+							\end{figure}
+							\begin{figure}[H]
+								\centering
+								\includegraphics[width = \textwidth]{./images/formatStringRecap2.png} 
+								
 							\end{figure}
 		
 		\section{Web Vulnerabilities}
@@ -784,6 +782,28 @@
 					\item allow selected
 					\item (additional) add reflection rules to allow symmetric communication
 				\end{enumerate}
+				Typical exercise has this table to fill out (here with some rule example):
+				\begin{center}
+					\begin{tabular}{ | m{3em} | m{2em} | m{2em} | m{4em} | m{2em} | m{2em} | m{5em} | m{5em} |}
+						\hline
+						Firewall ID & SRC IP & SRC port & direction & DST IP & DST port & policy & description\\
+						\hline
+						\hline
+						FW1 & any & any & net1 $\rightarrow$ net2 & any & any & deny & deny all incoming\\
+						\hline
+						FW1 & any & any & net1 $\rightarrow$ net2 & any & any & deny & deny all outgoing\\
+						\hline
+						FW1 & any & any & net1 $\rightarrow$ net2 & any & 80 & allow & allow web traffic\\
+						\hline
+						FW1 & any & 80 & net2 $\rightarrow$ net1 & any & any & allow & allow web traffic, response rule to previous \emph{only for stateless fws}\\
+						\hline
+						&&&&&&&\\
+						\hline
+						&&&&&&&\\
+						\hline
+					\end{tabular}
+				\end{center}
+				REMEMBER: the specified port for a protocol is one you \emph{receive} on. 
 				
 				
 \end{document}
