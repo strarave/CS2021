@@ -272,7 +272,7 @@
 			
 		\section{Vulnerabilities}
 			\subsection{Buffer Overflow}
-				Memory vulnerability, one of the most famous technique to exploit a software. Practically, it means that a piece of data is inserted in a buffer that is smaller. This enables the attacker to overwrite "sensitive" portion of the memory, and (in the worst case) inject malicious code. The thing that makes buffer overflow so dangerous is the way a buffer is allocated in 99\% of cases, so calling a function that does that: this allows the attacker to \emph{directly overwrite the return address from that function}.
+				Memory vulnerability, one of the most famous technique to exploit a software. Practically, it means that a piece of data is inserted in a buffer that is smaller then the data itself. This enables the attacker to overwrite "sensitive" portion of the memory, and (in the worst case) inject malicious code. The thing that makes buffer overflow so dangerous is the way a buffer is allocated in 99\% of cases, so calling a function that does that: this allows the attacker to \emph{directly overwrite the return address from that function}.
 					
 				\subsubsection{Buffer Overflow Defense}
 					Defending against buffer overflow means defending against a super powerful type of vulnerabilities that can harm a whole software. This kind of defense can be put in place in three main regions:
@@ -281,7 +281,7 @@
 						The source code is where the vulnerabilities is rooted. Making the source code safe from potential buffer overflow means \emph{educating developers} and \emph{using safe libraries} or safe version of already written libraries. The technology stack should be secure too!
 						
 					\paragraph{Compiler Level}
-						The compiler can inform the developer of the possible vulnerabilities, butthis still rely on the human. Another approach is to change the order (randomizing) of the arguments onto the stack. \emph{BUT} this is only temporary, as the buffer overflow is still there and can be found by exploiters by analyzing the output of the compiler, the binaries.\\
+						The compiler can inform the developer of the possible vulnerabilities, but this measure still rely on the human. Another approach is to change the order (randomizing) of the arguments onto the stack. \emph{BUT} this is only temporary, as the buffer overflow is still there and can be found by exploiters by analyzing the output of the compiler, the binaries.\\
 						The "canary mechanism" is also used: a spy is put on top of the stack (the canary is put by the prologue of the function) and then verified by the epilogue. If the canary is different, then the function has been overflowed, and the program has been compromised. Multiple approaches can be applied to canaries:
 						\begin{itemize}
 							\item Random-per-run canaries: each run of the program the canary is changed
@@ -603,12 +603,20 @@
 			\subsection{Known Malicious Behaviours}
 				Not all (known) patterns of execution of malwares are easily detectable or static:
 				\begin{itemize}
-					\item A program can be polymorphic or metamorphic, so be able to modify itself at runtime (for example inserting random dead code or on the fly code reordering)
+					\item A program can be polymorphic or metamorphic, so be able to modify itself at runtime (for example inserting random dead code or on the fly code reordering). More specifically, we tlak about "software polymorphism" when the syntax and the overall code of the malware change during execution, but the semantic remains the same. If encryption is used to do so, then the technique called \emph{packing} is being used. Instead, metamorphism alters the behaviour of the program \emph{in an ineffective way}, so that the final result is achieved nonetheless. Techniques to metamorph a piece of code are inserting no-operation or useless always verified checks, or to scramble the execution flow without altering the algorithm. 
 					\item A malware can be dormant, and waiting for particular conditions to be met: a particular time, a trigger...
 					\item Anti virtualization technique can be deployed: a program could \emph{detect} when it's being debugged and change his behaviour
-					\item An evolution of polymorphism introduced encryption techniques to avoid being detected
 					\item Rootkits: rootkits defines an approach to hacking a machine. A rootkit is a set of tool that "implants a root user" on a machine. This root user can then use other pieces of the rootkit itself to harm the system itself. I like more the Wikipedia definition though\footnote{\emph{A rootkit is a collection of computer software, typically malicious, designed to enable access to a computer or an area of its software that is not otherwise allowed (for example, to an unauthorized user) and often masks its existence or the existence of other software.}}.
 				\end{itemize}
+				
+				\paragraph{Rootkits}
+					Philosophy at the base of the rootkit: "become root and use your toolkit to remain so". Rootkits are collections of softwares, that each helps in a task (like becoming root, hiding processes and srevices). The "hiding services and processes" part is crucial: to avoid being detected, hiding malicious processes (and the tracks left behind in general) is fundamental.\\
+					Rootkits are divided in two macro categories:
+					\begin{itemize}
+						\item Userland rootkits, that exploits userspace tools (like normal OS utilities) to remain hidden and gain accesses and priviledges.
+						\item Kernel space rootkits, which instead are executed at kernel level. They're much more difficult to build and implant (as they require several high level authentication in order to do so) but they're also much more powerful. Kernel space rootkits can be detected only after \emph{post mortem analysis}. The kernel space rootkits, operating at (and under) OS level can completely hide software artifacts, but also \emph{compromise the system} in a significative way. They can even intercept and redirect syscalls.
+					\end{itemize}
+					At a higher level of technicality, Bootkits (rootkits hidden in the master boot record or in the boot artition) and HyperVisor level rootkits exists. 
 	
 	\clearpage \part{Exercises tips and notes}
 		\section{Binary Exploits}
@@ -701,7 +709,7 @@
 						So a valid exploit could be "\textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92\%420c3n": it writes "420" in the \textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92 memory cell, and the address is memorized as third parameter after the function.
 						
 					\paragraph{Writing Multiple Locations}
-						What if, for example, we want to write into memory (as the malicious data) a valid address, and this address occupies more than one word? Can we write \emph{multiple times} with the same exploit? Yes sir we can. This procedure involves a little bit of additional math, but it's pretty straightforward. First of all, the abstract of the metod: \emph{we use two times th \%N\$n writing mechanism putting two consecutive addresses on the memory, as parameters for N\$}. Whats the problem here? The problem here is that the second write is bounded to go \emph{over} (address speaking) the first one. So, we need to split our malicious data in two part, and write first the "litle" (in module) part.\\
+						What if, for example, we want to write into memory (as the malicious data) a valid address, and this address occupies more than one word? Can we write \emph{multiple times} with the same exploit? Yes sir we can. This procedure involves a little bit of additional math, but it's pretty straightforward. First of all, the abstract of the metod: \emph{we use two times th \%N\$n writing mechanism putting two consecutive addresses on the memory, as parameters for N\$}. What's the problem here? The problem here is that the second write is bounded to go \emph{over} (address speaking) the first one. So, we need to split our malicious data in two part, and write first the "littler" (in module) part.\\
 						More difficult said than done, trust me. It's very intuitive: the \%Nc placeholder can elongate the string of N characters, then (if we repeat the mechanism afterwards, \%Mc) add another M characters. Oviously, M cannot be less than zero, so we need to write \emph{first} the "lower" (in absolute value) part of the malicious data and then the "higher" (as remaining part).\\
 						The final exploit turns out to be something like
 						\begin{equation}
@@ -711,9 +719,12 @@
 								\text{offset of the target address } OFF, \,OFF+1\\
 							\end{cases}
 						\end{equation}
+						TA and TA+1 are written in the hexadecimal format with the "\textbackslash x" every byte AND remember that the bytes are to be written in reverse order (usually little endian).
 						\begin{equation}
 							(TA) (TA+1) \,\%low\vert\,MD\,\vert\, c\%(OFF)\$n\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$n
 						\end{equation}
+						A valid exploit to write "0x44674234" at address "0x42414515" is\\
+						"\textbackslash x15\textbackslash x45\textbackslash x41\textbackslash x42\textbackslash x17\textbackslash x45\textbackslash x41\textbackslash x42\%16940c\%7\$hn\%563c\%8\$hn"
 						
 						\subparagraph{Quick Note on this Part}
 							So I think I was not totally accurate in writing these notes, so I'll put the professor recap from \emph{his slides} right here in the notes.
