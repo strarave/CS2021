@@ -618,6 +618,25 @@
 					\end{itemize}
 					At a higher level of technicality, Bootkits (rootkits hidden in the master boot record or in the boot artition) and HyperVisor level rootkits exists. 
 	
+	\clearpage \part{Mobile Security}
+		\section{Mobile Devices}
+			Why should an attacker target mobile devices? Here's a bunch of pros:
+			\begin{enumerate}
+				\item Always online
+				\item Nowadays, high computing capability
+				\item Handles sensitive data
+			\end{enumerate}
+			So harming a person mobile device means that the attacker gains access to private emails and messages, maybe private accounts or personal transactions, and can be sure that a "way out" on the network is always present. This makes mobile devices extremely attractive for hackers.
+			
+		\section{Security Models for Mobile Operative Systems}
+			\subsection{Apple Model}
+				Apple mobile operative system iOS implements code signing to enforce security. This method asks developers to digitally sign (usually through a checksum verifier method) the code and the whole app is verified \emph{every time it's executed}. The certificate is signed by Apple Store, that is the only trusted element of the Apple ecosystem. \emph{No unsigned code can be executed in an Apple device.}\footnote{Unless jailbreak.}\\
+				Another measure deployed is sandboxing with predefined permissions: the apps developed targeting apple iOS have no access to \emph{any} file or hardware in the device; they can only access their "personal" directory. The kernel uses Mandatory Access Control to manage accesses.
+			
+			\subsection{Android Model}
+				Android checks the \emph{integrity} of the cryptographic sign of the app at installing time, but not during runtime. This allows the app to put in place dynamic code generation, or OTA silent updates. Also, every app can be \emph{self signed} and there's no CA to regulate that.\\
+				Also Android sandboxes apps, but the permissions are handled by the underlying linux kernel.
+			
 	\clearpage \part{Exercises tips and notes}
 		\section{Binary Exploits}
 			\subsection{Buffer Overflows}
@@ -633,7 +652,8 @@
 							\item if vectors, allocated from the last element
 						\end{itemize}
 				\end{enumerate}
-				Remember: \emph{stack grows towards smaller addresses}.
+				Remember: \emph{stack grows towards smaller addresses}.\\
+				Also, watch out for the dimension of the exploit: if the shellcode/malicious code is bigger than the available space on the stack, it means that the only technique we can use is return to libc (or at least exploiting some sort of enviromental variable). 
 				
 				\paragraph{Building the exploit}
 					To exploit a buffer overflow vulnerability, we need to
@@ -714,14 +734,14 @@
 						The final exploit turns out to be something like
 						\begin{equation}
 							\begin{cases}
-								\text{target addresses } TA, \,TA+1\\
+								\text{target addresses } TA, \,TA+2\\
 								\text{malicious data } MD\\
 								\text{offset of the target address } OFF, \,OFF+1\\
 							\end{cases}
 						\end{equation}
 						TA and TA+1 are written in the hexadecimal format with the "\textbackslash x" every byte AND remember that the bytes are to be written in reverse order (usually little endian).
 						\begin{equation}
-							(TA) (TA+1) \,\%low\vert\,MD\,\vert\, c\%(OFF)\$n\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$n
+							(TA) (TA+2) \,\%(low\vert\,MD\,\vert - chars\,printed)\, c\%(OFF)\$hn\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$hn
 						\end{equation}
 						A valid exploit to write "0x44674234" at address "0x42414515" is\\
 						"\textbackslash x15\textbackslash x45\textbackslash x41\textbackslash x42\textbackslash x17\textbackslash x45\textbackslash x41\textbackslash x42\%16940c\%7\$hn\%563c\%8\$hn"
@@ -774,16 +794,19 @@
 					\item Client side input sanitizing (easily disabled)
 					\item Server side input sanitizing 
 				\end{itemize}
-				This kind of attacks usually require to extract some information from a DB; an SQLi injection exploit follows a rigid structue
+				This kind of attacks usually require to extract some information from a DB; an SQLi injection exploit follows a rigid structure
 				\begin{enumerate}
-					\item a string terminator (apice or double apices) that is used to cloe the parameter that can be exploited
+					\item a string terminator (apice or double apices) that is used to close the parameter that can be exploited
 					\item either a modified or additional condition to manipulate a \verb|WHERE| clause, where usually the parameters are inserted
 					\item either a 
 						\begin{itemize}
 							\item query terminator plus comment symbol
 							\item UNION clause
+							\item apices (in the case we'd like to still use the part of the original query we've cut out)
 						\end{itemize}
 				\end{enumerate}
+				If the injected code exploits a vulnerability in a \verb|INSERT INTO| clause, the additional condition of the list is replaced with an additional \verb|VALUES| clause.\\
+				REMEMBER: the malicious input should not undergo transformations that alter the payload (like base64 encoding or hashing of some kind). So WATCH OUT for this kind of encodings. Also, while building the exploit, remember that the data we've to verify that the data were correctly inserted OR we must be able to exfiltrate properly the information we're trying to steal. \emph{This is not obvious} and can require several logical steps to get to the right infos.
 				
 		\section{Secure Network Architectures}
 			\subsection{ACLs and Firewall Rules}
@@ -814,7 +837,30 @@
 						\hline
 					\end{tabular}
 				\end{center}
-				REMEMBER: the specified port for a protocol is one you \emph{receive} on. 
+				REMEMBER: the specified port for a protocol is one you \emph{receive} on.
+				
+		\section{Malwares}
+			Typical exercise on this part: recognize which techniques is being used by a program to hide. Quick list of easy-to-prove properties:
+			\begin{center}
+				\begin{tabular}{ | m{10em} || m{6em} | m{4em} | m{6em} | m{6em} |}
+					\hline
+					Property & Polymorphism & Packing & Metamorphism & Trigger based \\
+					\hline
+					\hline
+					Same instructions, different order (jumps inserted) & & & X & \\
+					\hline
+					Different instructions & X & X & & \\
+					\hline
+					Encrypt decrypt primitives & X & X & & \\
+					\hline
+					Compression primitives & & X & & \\
+					\hline
+					Same syscalls & X & X & & \\
+					\hline
+					Lots of "sleep" functions accessed through conditional instructions on some hardware property & & & & X \\
+					\hline
+				\end{tabular}
+			\end{center}
 				
 				
 \end{document}
