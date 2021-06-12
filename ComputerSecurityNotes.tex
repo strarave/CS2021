@@ -16,7 +16,6 @@
 	\clearpage
 	
 	\clearpage \part{Introduction} 
-		%% shellcoder's handbook, C. Anley and J. Heasman
 		\section{Security}
 			What is security? First, we need to distinguish \emph{security} itself and \emph{safety}; the first represents a system that protects from the outside, the second a system that does not harm when it's used.
 			
@@ -34,7 +33,13 @@
 				\begin{itemize}
 					\item Vulnerability: something that allows to violate one of the CIA properties. It can be something as a design errors, a construction error, or a use defect. Even an \emph{inherent property} of a system can be a vulnerability.
 					\item Exploit: a specific way to use a vulnerability (or more) to violate one of CIA properties.
-					\item Asset: values of a system, properties that must be protected. Depending on the context a system operates in, different assets can be defined (soldier - armor - life).
+					\item Asset: values of a system, properties that must be protected. Depending on the context a system operates in, different assets can be defined. We should always think about which components are damaged in the case of a successful attack: can be
+						\begin{itemize}
+							\item the users of a system
+							\item the company that produces the system
+							\item the physical environment the system is in
+							\item also intangible assets, like the \emph{reputation} of the users/owner of the system
+						\end{itemize}
 					\item Threat: \textbf{possible / potential} violation of CIA constraints. A threat is linked to a threat agent, that's the actual physical person / system that performs the potential attack.
 					\item Attack: \textbf{intentional} use of an exploit to violate CIA properties.
 					\item Risks: combination of assets, vulnerabilities and threats. Formally (using economic value) they're A*V*T. Risk management takes care of the first two properties. The security problem is to manage the reduction of vulnerabilities and the recovery / mitigation plan. 
@@ -42,20 +47,18 @@
 				\textbf{A vulnerability can be present without any exploits. An exploit depends from a set of vulnerabilities}.\\
 				
 				\paragraph{Security vs Cost Balance}
-					As usual, costs can be separated in direct and indirect costs. In this scenario, direct costs are related to the actual put-in-place of a solution. Indirect costs, instead are all the user experience costs, all those experience-heaving procedures, for example. So EVERY SINGLE SECURITY SOLUTION ADDS A COST.
+					As usual, costs can be separated in direct and indirect costs. In this scenario, direct costs are related to the actual put-in-place of a solution. Indirect costs, instead, are all the user experience costs, all those experience-heaving procedures, for example. So EVERY SINGLE SECURITY SOLUTION ADDS A COST.
 					
 				\paragraph{Trust and Boundaries}
 					The security problem must have boundaries, otherwise it will cover over the universe. So, subparts must become \emph{trusted} and be \emph{assumed secure}. All the system that are beyond (below) the boundary are assumed secure too. The trusted element is the one to be tested most. 
 			
-			
-				
 	\clearpage \part{Cryptography}
 		\section{Cryptography, cryptoanalisys, cryptology}
 			Cryptography is the building of secure mathematical systems. Cryptoanalisys is the discipline of analyzing such systems, and trying to break them. Cryptology is the union of both.\\
 			Cryptography \emph{as a discipline} was formalized by Claude Shannon in 1949. The (still actual) formalization of a cryptosystem is composed of 3 main components:
 			\begin{enumerate}
 				\item the \emph{plaintext}, the message to be encoded
-				\item the reversible \emph{key}
+				\item the reversible encoding function, which usually depends on a \emph{key}
 				\item the \emph{cyphertext}, the encoded message
 			\end{enumerate}
 			
@@ -65,17 +68,17 @@
 					\item confidentiality: only the recipients can read and utilize the information in the message.
 					\item integrity: data can't be altered in the message passing. If so, the recipient can detect the change.
 				\end{enumerate}
-				The Kerchoff's principles states that the security of a cryptosystem relies \emph{solely} on the secrecy of the key, rather than the secrecy of the algorithm. This, in fact, should remain public. This means that a secure system is \emph{transparent} inherently.\\
+				The Kerchoff's principles states that the security of a cryptosystem relies \emph{solely} on the secrecy of the key, rather than the secrecy of the algorithm. The algorithm itself, in fact, should remain public. This means that a secure system is \emph{transparent} inherently.\\
 				\textbf{The key must be the trusted element of the entire cryptographic system}.\\
 				Formally, a perfect cypher does not leak any information about the message if and only of
 				\begin{equation}
 					P(M=m \,\vert\, C=c) = P(M=m)
 				\end{equation}
-				As theorized by Shannon. So "the probability of observing message m given cypher c is indipendent from the cypher given". Shannon also proved that perfect cyphers exists: they're \emph{one time non reusable key systems, with the lenght of the key equal to the lenght of the message} (also known as the \textbf{Shannon Theorem)}.\\
+				As theorized by Shannon. So "the probability of observing message m given cypher c is indipendent from the cyphertext given". Shannon also proved that perfect cyphers exists: they're \emph{one time non reusable key systems, with the lenght of the key equal to the lenght of the message} (also known as the \textbf{Shannon Theorem)}.\\
 				The only perfect cypher implementation is OTP, One Time Pad. Classic XOR based encryption with a one time password (pre shared) that is long as the message. The cool thing about perfect cyphers such as OTP is that bruteforcing the cyphertext simply returns all the possible combination of plaintext, rendering so useless the brutaforce approach.
 			
 			\subsection{Cryptoanalysis}
-				All the "brutaforce" fuss is about the problem of determining "how much a system is breakable". Bruteforce "always works", but it's a costly approach. So, it formally represents an \emph{upper bound} to the decyfering provedure complexity for that cypher. Other (more smart) attacks are 
+				All the "brutaforce" fuss is about the problem of determining "how much a system is breakable". Bruteforce "always works", but it's a costly approach. So, it formally represents an \emph{upper bound} to the deciphering provedure complexity for that cypher. Other (more smart) attacks are 
 				\begin{itemize}
 					\item Cyphertext attack - only cyphered text are available, a key/algorithm leak of information must be exploited
 					\item Known plaintext attack - comparation between the plain and crypted texts should lead to the key
@@ -88,25 +91,26 @@
 					\item Security of a CS is based on the robustness of the \emph{algorithm}
 					\item No algorithm is invulnerable to brute force attacks, exceptionmade for \emph{one time pads}
 					\item An algorithm is said to be broken if there's at least one way \emph{faster than bruteforce} to bypass it
-					\item THe only way to prove a cypher is robust is to try to break it
+					\item The only way to prove a cypher is robust is to try to break it
 				\end{enumerate}
 		
 		\section{Symmetric Encryption}
-			Classic: Alice uses key K to encrypt message M into cypher C, then Bob uses the very same key K to decypher cypher C into message M. Problem: exchanging keys. We need a \emph{trusted separated channel} to exchange the key. What is a trusted channel? It generally is a different channel that both the recipients \emph{consider trusted} and generally \emph{requires a different attack to be violated}.\\
+			Classic: Alice uses key K to encrypt message M into cypher C, then Bob uses the very same key K to decipher cypher C into message M. Problem: exchanging keys. We need a \emph{trusted separated channel} to exchange the key. What is a trusted channel? It generally is a different channel that both the recipients \emph{consider trusted} and generally \emph{requires a different attack to be violated}.\\
 			We so must try to find a way to send to all recipents the key \emph{in a secure way}. Another issue with symmetric encrypted communication is scalability, each pair of user in a network should have a unique key. 
 			
 			\subsection{How to build a secure symmetric system}
 				Three characteristics are fundamental to ensure the robustness of a symmetric cypher:
 				\begin{enumerate}
-					\item \emph{Multi Alphabetical Cyphers}: to mask structure and repetition in the plaintext several target alphabets can be (must be) used at the same time.
+					\item \emph{Substitution}: replacing bytes. Ceasar's cypher is the perfect example of only-transposing symmetric cypher.
 					\item \emph{Transposition}: also called diffusion, it consists of "swapping the value of bits", messing with the order in which the plaintext is translated.
+					\item \emph{Multi Alphabetical Cyphers}: to mask structure and repetition in the plaintext several target alphabets can be (must be) used at the same time.
 				\end{enumerate}
 				
 				\paragraph{Keyspace}
 					With keyspace is intended the \emph{set of possible keys}. There's an exponential correlation between the size (rank) of this set and the temporal complexity of the brutaforce effort. This means that more possible keys (generally translated in "how many bits is the key made of") more the time needed to bruteforce the cypher. \emph{This is valid in the current silicon architecture computers. Quantum computations could change this}.
 		
 		\section{Asymmetric Encryption}
-			Cyphers with \emph{two} directional keys instead of one. What is encrypted with key A can be decrypted with key B and viceversa. What you can't do is
+			Cyphers with \emph{two} directional keys instead of one. What is encrypted with key A can be decrypted \emph{\textbf{only}} with key B and viceversa. What you can't do is
 			\begin{itemize}
 				\item decrypt the key with the \emph{same} key you used to encrypt the key
 				\item deduce (calculate) one key from another
@@ -739,7 +743,7 @@
 								\text{offset of the target address } OFF, \,OFF+1\\
 							\end{cases}
 						\end{equation}
-						TA and TA+1 are written in the hexadecimal format with the "\textbackslash x" every byte AND remember that the bytes are to be written in reverse order (usually little endian).
+						TA and TA+2 are written in the hexadecimal format with the "\textbackslash x" every byte AND remember that the bytes are to be written in reverse order (usually little endian). REMINDER: if we are inverting the string (so the higher absolute value is the second part of the malicious data) also the two addresses are swapped in the final exploit.
 						\begin{equation}
 							(TA) (TA+2) \,\%(low\vert\,MD\,\vert - chars\,printed)\, c\%(OFF)\$hn\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$hn
 						\end{equation}
@@ -755,7 +759,6 @@
 							\begin{figure}[H]
 								\centering
 								\includegraphics[width = \textwidth]{./images/formatStringRecap2.png} 
-								
 							\end{figure}
 		
 		\section{Web Vulnerabilities}
