@@ -714,6 +714,7 @@
 						\begin{itemize}
 							\item A target address, the one that represents the block of memory \emph{to be overwritten};
 							\item An arbitrary piece of data (could be another address, an arbitrary number, a set of flags...) \emph{that we want to write in memory}
+							\item \emph{An unchecked printing function that does not format the output}, or that uses the \%s format placeholder.
 						\end{itemize}
 						What do we need to do:
 						\begin{enumerate}
@@ -743,10 +744,16 @@
 								\text{offset of the target address } OFF, \,OFF+1\\
 							\end{cases}
 						\end{equation}
-						TA and TA+2 are written in the hexadecimal format with the "\textbackslash x" every byte AND remember that the bytes are to be written in reverse order (usually little endian). REMINDER: if we are inverting the string (so the higher absolute value is the second part of the malicious data) also the two addresses are swapped in the final exploit.
+						TA and TA+2 are written in the hexadecimal format with the "\textbackslash x" every byte AND remember that the bytes are to be written in reverse order (usually little endian).
+						REMINDER: watch out for the \emph{actual} written file from the print function. They're always $targetAddressBytes \,+\, charactersAlreadyPrintedByPrintf$
 						\begin{equation}
 							(TA) (TA+2) \,\%(low\vert\,MD\,\vert - chars\,printed)\, c\%(OFF)\$hn\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$hn
 						\end{equation}
+						in the case of $\vert first\, part \vert \,>\, \vert second\,part\vert $
+						\begin{equation}
+							(TA+2) (TA) \,\%(low\vert\,MD\,\vert - chars\,printed)\, c\%(OFF)\$hn\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$hn
+						\end{equation}
+						in the other case.
 						A valid exploit to write "0x44674234" at address "0x42414515" is\\
 						"\textbackslash x15\textbackslash x45\textbackslash x41\textbackslash x42\textbackslash x17\textbackslash x45\textbackslash x41\textbackslash x42\%16940c\%7\$hn\%563c\%8\$hn"
 						
@@ -777,7 +784,9 @@
 						Unchecked write of content to the client \emph{from client itself} & & X & X \\
 						\hline
 						Unchecked write of content to the client \emph{using a client side technology} & & & X \\
-						\hline							
+						\hline
+						\textbf{Type of remedy} & Input sanitizing, server side, CSP & DB check of entities & Client side sanitizing \\ 
+						\hline
 					\end{tabular}
 				\end{center}
 				
@@ -861,6 +870,8 @@
 					Same syscalls & X & X & & \\
 					\hline
 					Lots of "sleep" functions accessed through conditional instructions on some hardware property & & & & X \\
+					\hline
+					\textbf{Best practice} & dynamic analys & dynamic analysis  & dynamic analysis & static analysis \\
 					\hline
 				\end{tabular}
 			\end{center}
