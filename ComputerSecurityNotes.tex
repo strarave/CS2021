@@ -821,6 +821,32 @@
 				REMEMBER: the malicious input should not undergo transformations that alter the payload (like base64 encoding or hashing of some kind). So WATCH OUT for this kind of encodings. Also, while building the exploit, remember that the data we've to verify that the data were correctly inserted OR we must be able to exfiltrate properly the information we're trying to steal. \emph{This is not obvious} and can require several logical steps to get to the right infos.
 				
 		\section{Secure Network Architectures}
+			\subsection{Designing a Secure Network Architecture}
+				Quick list of things to keep in mind when positioning firewalls to divide subnets:
+				\begin{itemize}
+					\item 99\% of networks needs a DMZ. Things that go in a DMZ:
+						\begin{itemize}
+							\item The web server ($\Leftrightarrow$ the company must be accessible through a website)
+							\item A mail server (but only the inbound one, the InSMTP one. There's no need for an outbound mail server to be placed in the DMZ)
+							\item \textbf{The Proxy}: if the network requires some traffic to go through a proxy machine, it's 99\% of the time placed \textit{outside} the main LAN $\rightarrow$ in the DMZ
+							\item A DNS server: this can be placed either inside the LAN or the DMZ. It makes more sense in the DMZ though
+						\end{itemize}
+						Things that \textbf{DO NOT} go in a DMZ:
+						\begin{itemize}
+							\item The outbound mail server 
+							\item The application server: in most cases, services are provided through the web $\rightarrow$ the application server with all the application logic must not be exposed, but must be accessible from the web server
+							\item The database. No need to say why putting the DB in the DMZ is a bad idea
+						\end{itemize}
+					\item It's usually a good practice to separate "logically different" areas of the network\footnote{also for congestion reasons}: in the seen exercises, behind the DMZ, usually the LAN is partitioned in:
+						\begin{itemize}
+							\item A \textit{service} segment where the application server resides, alongside the DB and eventually a mail server
+							\item A \textit{lan} segment
+							\item An additional \textit{special purpose} segment if needed (to manage an IoT sensor swarm, a pool of machine, or simply a different sector in the organization)
+						\end{itemize}
+					\item Edges of network segments are \textit{firewalled}
+					\item Multiple segments can use the same firewall, but it's not impossible to have three or more deep chains of firewall to further partition the overall network
+				\end{itemize}
+
 			\subsection{ACLs and Firewall Rules}
 				Classic approach to firewall rules in general:
 				\begin{enumerate}
