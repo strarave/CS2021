@@ -89,7 +89,7 @@
 			\subsection{Remarks on Cryptosystems}
 				\begin{enumerate}
 					\item Security of a CS is based on the robustness of the \emph{algorithm}
-					\item No algorithm is invulnerable to brute force attacks, exceptionmade for \emph{one time pads}
+					\item No algorithm is invulnerable to brute force attacks, exception made for \emph{one time pads}
 					\item An algorithm is said to be broken if there's at least one way \emph{faster than bruteforce} to bypass it
 					\item The only way to prove a cypher is robust is to try to break it
 				\end{enumerate}
@@ -112,7 +112,7 @@
 		\section{Asymmetric Encryption}
 			Cyphers with \emph{two} directional keys instead of one. What is encrypted with key A can be decrypted \emph{\textbf{only}} with key B and viceversa. What you can't do is
 			\begin{itemize}
-				\item decrypt the key with the \emph{same} key you used to encrypt the key
+				\item decrypt the message with the \emph{same} key you used to encrypt the message
 				\item deduce (calculate) one key from another
 			\end{itemize}
 			This approach enables "public key scenarios" due to the asymmetricity of the encryption mechanism. The robustness of this methods relies on the function used to encrypt the plaintext, that must be easy to apply \emph{but difficult to reverse}.\\
@@ -128,7 +128,7 @@
 				\end{enumerate}
 				
 				\subsubsection{Attacks to Hash Functions}
-					Hash function may be broken. This means that it's possible to find the original text from the cyphertwxt \emph{faster than bruteforcing}, just as the definition of broken cryptosystem. Two methods are used to attack a hash function:
+					Hash function may be broken. This means that it's possible to find the original text from the cyphertext \emph{faster than bruteforcing}, just as the definition of broken cryptosystem. Two methods are used to attack a hash function:
 					
 					\paragraph{Arbitrary Collision}
 						This is a first/second preimage attack: the attacker tries to deduce $x \,\vert\, H(x) = h$ or, respectively, $y \,\vert\, y \neq x \wedge H(x) = H(y)$.\\
@@ -204,7 +204,7 @@
 					\end{enumerate}
 				
 				\subsubsection{Single Sign On}
-					Single sign on was proposed as a system to countermeasure to password reusing. This system is based on a 1-2 factors authentication and \emph{a single trusted host}. This is simply the "delegating authentication to someone else" method of authentication, the \emph{external auth} method. Two main approaches:
+					Single sign on was proposed as a countermeasure to password reusing. This system is based on a 1-2 factors authentication and \emph{a single trusted host}. This is simply the "delegating authentication to someone else" method of authentication, the \emph{external auth} method. Two main approaches:
 					\begin{itemize}
 						\item SAML approach: an external service serves as authentication factor
 						\item OAuth approach: the external service \emph{just helps the authentication}, giving the user a code in order to sign on to the principal service
@@ -689,85 +689,31 @@
 					\end{center}
 					
 			\subsection{Format String}
-				\subsubsection{Remainder: Exploiting Format String Bug in a ANSI C Program}
-					We have several placeholders and placeholders extensions we can use to make a format string vulnerability super dangerous.\\
-					Placeholders:
-					\begin{enumerate}
-						\item \%d and \%i to print integers
-						\item \%u to print unsigned decimals
-						\item \%X and \%x to print unsigned hexadecimals
-						\item \%o for octals
-						\item \%c for chars, \%s for strings
-					\end{enumerate}
-					Placeholder modifiers (of interest):
-					\begin{enumerate}
-						\item N\$: if inserted between the \% and the placeholder character tells the formatter to go to the N-th parameter.
-						\item \%n: this placeholder \emph{writes the number of chars printed} so far to the address pointed \emph{by the argument}. The important thing is: whatever value is in the memory \emph{where the argument is searched}, it will be interpeted as a memory location. We will also use his brother \%hn, that writes a shortint.
-						\item also, the \%c placeholders for chars can be extended as \%Nc where N is the number of times the first char argument must be prented.
-					\end{enumerate}
-					So, how do we exploit this?\\
-					First of all, we can build a "memory scanner" with just "\%N\$x" and iterating over N: this will print the hexadecimal code of all the "arguments" (memory slots) after the one passed as an argument. Remember, we're sure to be on the stack of the application, because this bug targets \emph{printing functions}, and the exploit string will be the parameter of such function. This is already a vulnerability: we can exploit this to make tha pplication leak information by \emph{directly accessing its memory space}.\\
-					To also write, obviously we need to use \%n. We must combine the character-generating placeholder \%Nc and the target-sniping placeholder N\$ in order to obtain the right alignement of the memory and to write \emph{exactly there}. This also highlights the main difference between a buffer overflow vulnerabilty and a format string one: while the BOF acts as a tank overwriting all the memory it traveses, the format string modify exactly the portion of memory needed, leaving the rest unchanged. 
-					
-					\paragraph{Format String in Practice}
-						What we need:
+				How to write an exploit for a format string vulnerability, let's directly focus on what to do if we want to write an entire \verb|DWORD|, and not a single 16-bit \verb|WORD|\footnote{Why? Because we can, \textit{sir}.}.\\
+				We need:
+				\begin{enumerate}
+					\item Some malicious data (32 bit of data)
+					\item A place where we want to write such data
+					\item A stack offset where \textit{we know} we can put data; we will put the target address
+				\end{enumerate}
+				We build the exploit this way:
+				\begin{enumerate}
+					\item The two target addresses
 						\begin{itemize}
-							\item A target address, the one that represents the block of memory \emph{to be overwritten};
-							\item An arbitrary piece of data (could be another address, an arbitrary number, a set of flags...) \emph{that we want to write in memory}
-							\item \emph{An unchecked printing function that does not format the output}, or that uses the \%s format placeholder.
+							\item If the first half of the payload is \emph{greater than}\footnote{in decimal} the second one, then we write the address and the address plus two in order in the string (with the usual format for hexadecimal values: \textbackslash \verb|0A|)
+							\item If not, we reverse them: first we put \verb|ADDR + 2| then \verb|ADDR|
 						\end{itemize}
-						What do we need to do:
-						\begin{enumerate}
-							\item suppose we already know the target address of the memory portion to tamper, we need to put this address \emph{exactly} in the position that the \%n will point. To do so, we use the memory-scanner we've presented previously, to finde the offset of it. For now, our string is composed only by the target address.
-							\item at this point we need to introduce in our malicious string the data we want to write. To do so, we concatenate the target address with the malicious data generated by the \%Nc placeholder. We now have, as exploit string, "hex of target address + \% (malicious data in decimal - address dimension) c".
-							\item lastly, we need to combine the previous step with the writing placeholder \%n. Where do we write (so, which value do I insert in the N\$ parameter of the placeholder)? We need to write in the target address \\$\Rightarrow$ we have put the target address on the stack\\$\Rightarrow$ we have discovered the offset of such address by scanning the memory\\$\Rightarrow$ we put that offset here.
-						\end{enumerate}
-						Our final string is something resembling
+					\item the first character placeholder \%Nc where 
 						\begin{equation}
-							\begin{cases}
-								\text{target address } TA\\
-								\text{malicious data } MD\\
-								\text{offset of the target address } OFF\\
-							\end{cases}
-							\Rightarrow TA \,\%MD\, c\%\,OFF\,\$n 
+							N = decimal(lower\, part\, of\, payload) - \#(characters\, already\, written)
 						\end{equation}
-						So a valid exploit could be "\textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92\%420c3n": it writes "420" in the \textbackslash xcc\textbackslash xff\textbackslash x86\textbackslash x92 memory cell, and the address is memorized as third parameter after the function.
-						
-					\paragraph{Writing Multiple Locations}
-						What if, for example, we want to write into memory (as the malicious data) a valid address, and this address occupies more than one word? Can we write \emph{multiple times} with the same exploit? Yes sir we can. This procedure involves a little bit of additional math, but it's pretty straightforward. First of all, the abstract of the metod: \emph{we use two times th \%N\$n writing mechanism putting two consecutive addresses on the memory, as parameters for N\$}. What's the problem here? The problem here is that the second write is bounded to go \emph{over} (address speaking) the first one. So, we need to split our malicious data in two part, and write first the "littler" (in module) part.\\
-						More difficult said than done, trust me. It's very intuitive: the \%Nc placeholder can elongate the string of N characters, then (if we repeat the mechanism afterwards, \%Mc) add another M characters. Oviously, M cannot be less than zero, so we need to write \emph{first} the "lower" (in absolute value) part of the malicious data and then the "higher" (as remaining part).\\
-						The final exploit turns out to be something like
+					\item the first \%N\$hn placeholder to instruct to write, where N is the displacement in the stack where we found out our string with the address would be. WATCH OUT: the displacement can depend from the lenght of the string we're passing!
+					\item second character placeholder, this time
 						\begin{equation}
-							\begin{cases}
-								\text{target addresses } TA, \,TA+2\\
-								\text{malicious data } MD\\
-								\text{offset of the target address } OFF, \,OFF+1\\
-							\end{cases}
+							N = decimal(higher\, part\, of\, payload) - decimal(lower\, part)
 						\end{equation}
-						TA and TA+2 are written in the hexadecimal format with the "\textbackslash x" every byte AND remember that the bytes are to be written in reverse order (usually little endian).
-						REMINDER: watch out for the \emph{actual} written file from the print function. They're always $targetAddressBytes \,+\, charactersAlreadyPrintedByPrintf$
-						\begin{equation}
-							(TA) (TA+2) \,\%(low\vert\,MD\,\vert - chars\,printed)\, c\%(OFF)\$hn\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$hn
-						\end{equation}
-						in the case of $\vert first\, part \vert \,>\, \vert second\,part\vert $
-						\begin{equation}
-							(TA+2) (TA) \,\%(low\vert\,MD\,\vert - chars\,printed)\, c\%(OFF)\$hn\%(high - low)\vert\,MD\vert\,c\%(OFF+1)\$hn
-						\end{equation}
-						in the other case.
-						A valid exploit to write "0x44674234" at address "0x42414515" is\\
-						"\textbackslash x15\textbackslash x45\textbackslash x41\textbackslash x42\textbackslash x17\textbackslash x45\textbackslash x41\textbackslash x42\%16940c\%7\$hn\%563c\%8\$hn"
-						
-						\subparagraph{Quick Note on this Part}
-							So I think I was not totally accurate in writing these notes, so I'll put the professor recap from \emph{his slides} right here in the notes.
-							\begin{figure}[H]
-								\centering
-								\includegraphics[width = \textwidth]{./images/formatStringRecap1.png}
-							\end{figure}
-							\begin{figure}[H]
-								\centering
-								\includegraphics[width = \textwidth]{./images/formatStringRecap2.png} 
-							\end{figure}
-		
+					\item the second and last \%N\$hn placeholder (the one that effectively write), where N is the offset we calculated in (3) incremented by one
+				\end{enumerate}
 		\section{Web Vulnerabilities}
 			\subsection{Cross Site Scripting}
 				It's important to recognize the XSS vulenrrability we're working with. Here's a list of signals you can look after for each XSS vulns we've seen
