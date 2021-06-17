@@ -371,17 +371,18 @@
 				
 			\subsection{Same Origin / Content Security Policy}
 				\paragraph{Same Origin Policy}
-					SOP is a principle implemented in all web clients, that enforces the "don't touch other's stuff" rule: all client side code loaded from origin A can access only to resources loaded from origin A. This simple policy can be bypassed in several ways, and the modern web programming paradigms are making circumventing this rule easier to attackers: it's not so rare that more sites share the local resources (in order to offer enhanced services) or that client side extensions inibits some of the security countermeasures of the browser itself.\\
+					SOP is a principle implemented in all web clients, that enforces the "don't touch other's stuff" rule: all client side code loaded from origin A can access only to resources loaded from origin A. This simple policy can be bypassed in several ways, and the modern web programming paradigms are making circumventing this rule easier to attackers: it's not so rare that more sites share the local resources (in order to offer enhanced services) or that client side extensions inhibits some of the security countermeasures of the browser itself.\\
 				
 				\paragraph{Content Security Policy}
-					CSP, instead, is a measure adopted \emph{by websites} that aims to mitigate XSS and other code injection attack by \emph{informing the web browser which are the secure contents} that can be trusted\footnote{so, loaded and executed} on that page. It's embedded in the HTTP headers of the response. The CSP is implemented by the majority of commercial browsers. CSP is a great mitigation for attacks, but:
+					CSP\footnote{https://en.wikipedia.org/wiki/Content\_Security\_Policy}, instead, is a measure adopted \emph{by websites} that aims to mitigate XSS and other code injection attack by \emph{informing the web browser which are the secure contents} that can be trusted\footnote{so, loaded and executed} on that page. It's embedded in the HTTP headers of the response. The CSP is implemented by the majority of commercial browsers. CSP is a great mitigation for attacks, but:
 					\begin{enumerate}
 						\item writing the policies must be done by hand, and it's difficult
 						\item policies must be kept up to date
 						\item how many policies are enough? how many break functionalities (for example getting in the way of the loading of a library)?
 						\item how does CSP realate with browser extension? (same problem of SOP)
 					\end{enumerate}
-					
+					Reminder: if a browser does not support / has implemented CSP handling, it cannot use it. (This is to say that CSP is just a specification, and browsers need to implement it).
+
 		\section{Vulnerabilities and Attacks}
 			\subsection{SQL Injection}
 				Code injection attacks works all at the same way: they add (and then try to execute, or havo other execute it) malicious instructions in a place where these should not be, in order to harm a system. SQL injection is no different: the target this time are not-sanitized input fields in web forms,
